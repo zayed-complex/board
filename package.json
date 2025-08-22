@@ -1,21 +1,15 @@
-<<<<<<< HEAD
-
 {
   "name": "board",
   "version": "1.0.0",
-  "description": "Student/Employee Board Web App",
-  "main": "server.js",
+  "description": "Board project with backend and static frontend",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node backend/server.js"
   },
-  "author": "Ali Ahmad",
-  "license": "MIT",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "multer": "^2.0.2",
-    "xlsx": "^0.18.5"
+    "express": "^4.18.2"
   }
 }
->>>>>>> 5da52bd0164e43e45b2fbc39ccade0b599f57890
