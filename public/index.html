@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2196f3">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بوابة المدرسة</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#004080">
+  <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+  <!-- شاشة البداية -->
+  <div id="startScreen" class="centered">
+    <h1>👋 مرحباً بكم في بوابة المدرسة</h1>
+    <button onclick="enterStudent()" class="btn">دخول كطالب / ولي أمر</button>
+    <button onclick="showLogin('staff')" class="btn">دخول كموظف</button>
+  </div>
+
+  <!-- شاشة تسجيل دخول الموظف -->
+  <div id="loginScreen" class="hidden centered">
+    <h2 id="loginTitle">🔑 تسجيل دخول الموظف</h2>
+    <div id="loginForm">
+      <input type="text" id="username" placeholder="اسم المستخدم" class="input">
+      <input type="password" id="password" placeholder="كلمة المرور" class="input">
+      <button onclick="loginStaff()" class="btn">تسجيل الدخول</button>
+      <button onclick="backToStart()" class="btn-secondary">⬅ رجوع</button>
+    </div>
+  </div>
+
+  <!-- شاشة القائمة -->
+  <div id="menuContainer" class="hidden centered">
+    <h2>📚 القائمة</h2>
+    <ul id="menuList"></ul>
+    <button onclick="backToStart()" class="btn-secondary">⬅ خروج</button>
+  </div>
+
+  <!-- شاشة عارض PDF -->
+  <div id="viewerContainer" class="hidden">
+    <div class="viewer-header">
+      <button id="backButton" class="btn-secondary">⬅ رجوع</button>
+    </div>
+    <iframe id="pdfFrame" class="pdf-frame"></iframe>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js")
+      .then(() => console.log("✅ Service Worker Registered"))
+      .catch(err => console.error("SW Error:", err));
+  }
+</script>
+
+</body>
+</html>

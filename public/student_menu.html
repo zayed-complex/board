@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة تحكم الطالب / ولي الأمر</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="all-header">
+    <a href="javascript:history.back()" class="win-back-button">🔙 الرجوع</a>
+    <a href="#" onclick="exitApp()" class="win-exit-button">🔚 إنهاء</a>
+  </div>
+
+  <div class="menu-page-container">
+    <h2 class="text-center">🎓 لوحة تحكم الطالب / ولي الأمر</h2>
+  </div>
+
+  <div class="menu-boxes">
+    <div class="box">
+      <h3>📋 جداول مفيدة</h3>
+      <ul id="student-list"></ul>
+    </div>
+  </div>
+
+  <script src="/js/client.js"></script>
+  <script>
+    // تحميل القائمة من API ثم بناء الروابط كما في ملفاتك
+    renderMenu("/api/menu/student", document.getElementById("student-list"));
+  </script>
+</body>
+</html>

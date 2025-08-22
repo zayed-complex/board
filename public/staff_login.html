@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>تسجيل دخول الموظف</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="all-header">
+    <a href="javascript:history.back()" class="win-back-button">🔙 الرجوع</a>
+    <a href="#" onclick="exitApp()" class="win-exit-button">🔚 إنهاء</a>
+  </div>
+
+  <div class="login-container">
+    <div class="login-header">
+      <h2 class="text-center">تسجيل دخول الموظف</h2>
+    </div>
+
+    <div id="error" class="error" style="display:none"></div>
+
+    <form id="loginForm" class="login-form" dir="rtl">
+      <label for="username">اسم المستخدم:</label>
+      <input type="text" id="username" required />
+
+      <label for="password">كلمة المرور:</label>
+      <input type="password" id="password" required />
+
+      <button type="submit">تسجيل الدخول</button>
+    </form>
+  </div>
+
+  <script src="/js/client.js"></script>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const res = await apiPost("/api/login", { username, password });
+      if (res.success) {
+        location.href = "/staff_menu.html";
+      } else {
+        showError(res.message || "خطأ غير معروف");
+      }
+    });
+  </script>
+</body>
+</html>
