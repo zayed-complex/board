@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+
 {
   "name": "board",
   "version": "1.0.0",
@@ -6,7 +8,7 @@
   "scripts": {
     "start": "node server.js"
   },
-  "author": "Your Name",
+  "author": "Ali Ahmad",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -16,3 +18,4 @@
     "xlsx": "^0.18.5"
   }
 }
+>>>>>>> 5da52bd0164e43e45b2fbc39ccade0b599f57890
