@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use("/pdfs", express.static(path.join(__dirname, "pdfs")));
 
 // ============================
-// ✅ Student and Staff menus
+// ✅ Menus
 // ============================
 const studentMenu = [
   { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },

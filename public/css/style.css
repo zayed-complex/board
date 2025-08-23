@@ -123,3 +123,30 @@ li {
   padding: 10px;
   background: #f1f1f1;
 }
+.menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.has-submenu::after {
+  content: " ▼";
+  float: right;
+  font-size: 0.8em;
+}
+
+.submenu {
+  margin-left: 20px;
+  border-left: 1px solid #ccc;
+  padding-left: 10px;
+}
+
+.submenu-item {
+  font-size: 0.95em;
+}
