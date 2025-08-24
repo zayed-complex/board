@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>السياسات</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f9f9f9; margin:0; padding:20px; direction:rtl; text-align:center; }
+    h2 { margin-bottom:20px; }
+    .policy-btn {
+      display:block;
+      width:80%;
+      margin:10px auto;
+      padding:15px;
+      font-size:1.1em;
+      border:none;
+      border-radius:8px;
+      background:#4a90e2;
+      color:#fff;
+      cursor:pointer;
+      box-shadow:0 2px 5px rgba(0,0,0,0.2);
+      transition:0.2s;
+    }
+    .policy-btn:hover { background:#357ab8; }
+    .back-btn {
+      margin-top:20px;
+      padding:10px 20px;
+      font-size:1em;
+      border:none;
+      border-radius:6px;
+      background:#888;
+      color:#fff;
+      cursor:pointer;
+    }
+    .back-btn:hover { background:#555; }
+  </style>
+</head>
+<body>
+  <h2>📑 السياسات</h2>
+  <div id="policyContainer"></div>
+  <button class="back-btn" onclick="goBack()">↩️ رجوع</button>
+
+<script>
+async function loadPolicies(){
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get("role") || "student";
+  try {
+    const res = await fetch(`/api/policies/${role}`);
+    const policies = await res.json();
+    const container = document.getElementById("policyContainer");
+    container.innerHTML="";
+    policies.forEach(p=>{
+      const btn=document.createElement("button");
+      btn.className="policy-btn";
+      btn.textContent=p.title;
+      btn.onclick=()=>window.open(`/pdfs/${p.filename}`,"_blank");
+      container.appendChild(btn);
+    });
+  }catch(e){
+    alert("فشل تحميل السياسات");
+  }
+}
+
+function goBack(){
+  window.location.href = "/index.html";
+}
+
+document.addEventListener("DOMContentLoaded", loadPolicies);
+</script>
+</body>
+</html>

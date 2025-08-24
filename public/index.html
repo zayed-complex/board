@@ -11,10 +11,6 @@
     .menu-item { padding:12px 16px; cursor:pointer; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between; user-select:none; }
     .menu-item:hover { background:#f0f0f0; }
     .menu-icon { margin-right:10px; font-size:1.1em; }
-    .submenu { margin-left:20px; border-left:1px solid #ccc; padding-left:10px; display:none; }
-    .submenu-item { font-size:0.95em; background:#fafafa; padding:6px 12px; cursor:pointer; }
-    .submenu-item:hover { background:#e8f0fe; }
-    .submenu-toggle { cursor:pointer; font-weight:bold; }
   </style>
 </head>
 <body>
@@ -26,12 +22,11 @@
 <div id="menuContainer"></div>
 
 <script>
+let currentRole = "student";
+
 async function fetchMenu(role){
-  try{
-    const res = await fetch(`/api/menu/${role}`);
-    if(!res.ok) throw new Error("فشل جلب القائمة");
-    return (await res.json()).menu;
-  }catch(e){ console.error(e); alert("خطأ في تحميل القائمة"); return []; }
+  const res = await fetch(`/api/menu/${role}`);
+  return res.json();
 }
 
 function createMenuItem(item){
@@ -42,7 +37,6 @@ function createMenuItem(item){
   if(item.type==="pdf") icon="📄";
   else if(item.type==="page") icon="📑";
   else if(item.type==="external") icon="🌐";
-  else if(item.type==="submenu") icon="📂";
 
   const titleSpan = document.createElement("span");
   titleSpan.textContent = item.title;
@@ -53,33 +47,8 @@ function createMenuItem(item){
   el.appendChild(titleSpan);
 
   if(item.type==="pdf") el.onclick=()=>window.open(`/pdfs/${item.filename}`,"_blank");
-  else if(item.type==="page") el.onclick=()=>window.location.href=item.path;
+  else if(item.type==="page") el.onclick=()=>window.location.href=item.path + "?role=" + currentRole;
   else if(item.type==="external") el.onclick=()=>window.open(item.url,"_blank");
-  else if(item.type==="submenu"){
-    const subContainer = document.createElement("div");
-    subContainer.className="submenu";
-
-    item.items.forEach(sub=>{
-      const subEl = document.createElement("div");
-      subEl.className="submenu-item";
-      subEl.textContent = sub.title + " 📄";
-      subEl.onclick = e=>{ e.stopPropagation(); window.open(`/pdfs/${sub.filename}`,"_blank"); };
-      subContainer.appendChild(subEl);
-    });
-
-    const toggleBtn = document.createElement("span");
-    toggleBtn.className="submenu-toggle";
-    toggleBtn.textContent="▶";
-    toggleBtn.onclick = e=>{ 
-      e.stopPropagation();
-      const isOpen = subContainer.style.display!=="none";
-      subContainer.style.display = isOpen?"none":"block";
-      toggleBtn.textContent = isOpen?"▶":"▼";
-    };
-
-    el.appendChild(subContainer);
-    el.appendChild(toggleBtn);
-  }
 
   return el;
 }
@@ -93,8 +62,12 @@ async function renderMenu(role){
 
 document.addEventListener("DOMContentLoaded",()=>{
   const selector=document.getElementById("roleSelector");
-  renderMenu(selector.value);
-  selector.addEventListener("change",()=>renderMenu(selector.value));
+  currentRole = selector.value;
+  renderMenu(currentRole);
+  selector.addEventListener("change",()=>{
+    currentRole = selector.value;
+    renderMenu(currentRole);
+  });
 });
 </script>
 </body>
