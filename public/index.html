@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بوابة المدرسة</title>
+  <title>بوابة مجمّع زايد التعليمي</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -38,16 +38,7 @@
   <button class="btn" onclick="selectRole('student')">دخول كطلاب / ولي أمر</button>
   <button class="btn" onclick="selectRole('staff')">دخول كموظف</button>
 
-  <script>
-    function selectRole(role) {
-      sessionStorage.setItem("role", role);
-      if (role === "staff") {
-        // فتح نافذة تسجيل الدخول للموظفين
-        window.location.href = "staff_login.html";
-      } else {
-        window.location.href = `index.html?role=${role}`;
-      }
-    }
-  </script>
+  <!-- استدعاء ملف الجافاسكربت -->
+  <script src="main.js"></script>
 </body>
 </html>
