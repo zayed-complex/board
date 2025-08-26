@@ -1,44 +1,22 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بوابة مجمّع زايد التعليمي</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f9fc;
-      text-align: center;
-      padding-top: 100px;
-      direction: rtl;
-    }
-    h1 {
-      font-size: 2em;
-      margin-bottom: 30px;
-    }
-    .btn {
-      background: #3498db;
-      color: white;
-      border: none;
-      padding: 15px 25px;
-      margin: 10px;
-      border-radius: 8px;
-      font-size: 1.1em;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .btn:hover {
-      background: #217dbb;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة مجمّع زايد التعليمي</title>
+<style>
+body { font-family: Arial; text-align: center; padding: 50px; direction: rtl; }
+h1 { font-size: 2em; margin-bottom: 30px; }
+.btn { background: #3498db; color: white; border: none; padding: 15px 25px; margin: 10px; border-radius: 8px; font-size: 1.1em; cursor: pointer; }
+.btn:hover { background: #217dbb; }
+</style>
 </head>
 <body>
-  <h1>👋 مرحباً بكم في بوابة مجمّع زايد التعليمي</h1>
+<h1>👋 مرحباً بكم في بوابة مجمّع زايد التعليمي</h1>
 
-  <button class="btn" onclick="selectRole('student')">دخول كطلاب / ولي أمر</button>
-  <button class="btn" onclick="selectRole('staff')">دخول كموظف</button>
+<button class="btn" id="studentBtn">دخول كطالب / ولي أمر</button>
+<button class="btn" id="staffBtn">دخول كموظف</button>
 
-  <!-- استدعاء ملف الجافاسكربت -->
-  <script src="main.js" defer></script>
+<script src="main.js" defer></script>
 </body>
 </html>
