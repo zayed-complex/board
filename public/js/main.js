@@ -61,15 +61,6 @@ function openPdf(filename) {
 }
 
 // ================================
-// ✅ تحميل القائمة عند تحميل الصفحة
-// ================================
-document.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(window.location.search);
-  const role = params.get("role") || sessionStorage.getItem("role");
-  loadMenu(role);
-});
-
-// ================================
 // ✅ اختيار دور المستخدم
 // ================================
 function selectRole(role) {
@@ -87,3 +78,15 @@ function selectRole(role) {
     alert("الدور غير معروف!");
   }
 }
+
+// ✅ اجعل selectRole متاحة عالمياً للأزرار في HTML
+window.selectRole = selectRole;
+
+// ================================
+// ✅ تحميل القائمة عند تحميل الصفحة
+// ================================
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get("role") || sessionStorage.getItem("role");
+  loadMenu(role);
+});
