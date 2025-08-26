@@ -7,17 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from public folder
+// Serve static files from public
 app.use(express.static(path.join(__dirname, "../public")));
 
-// Serve index.html at root
+// Serve index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
-// ================================
-// Student and Staff menus
-// ================================
+// قوائم الطلاب
 const studentMenu = [
   { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
@@ -26,6 +24,7 @@ const studentMenu = [
   { title: "السياسات", type: "submenu", role: "student" }
 ];
 
+// قوائم الموظفين
 const staffMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
@@ -35,9 +34,7 @@ const staffMenu = [
   { title: "السياسات", type: "submenu", role: "staff" }
 ];
 
-// ================================
-// API: get menu by role
-// ================================
+// API للقوائم
 app.get("/api/menu/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
@@ -45,25 +42,15 @@ app.get("/api/menu/:role", (req, res) => {
   res.status(400).send("دور غير معروف");
 });
 
-// ================================
-// API: serve PDFs
-// ================================
+// حماية ملفات PDF
 app.get("/api/pdfs/:filename", (req, res) => {
   const safe = /^[a-zA-Z0-9_.-]+\.pdf$/;
   const { filename } = req.params;
-
   if (!safe.test(filename)) return res.status(400).send("اسم ملف غير صالح");
-
   const filePath = path.join(__dirname, "pdfs", filename);
   if (!fs.existsSync(filePath)) return res.status(404).send("الملف غير موجود");
-
   res.sendFile(filePath);
 });
 
-// ================================
-// Start server
-// ================================
 const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
