@@ -32,4 +32,43 @@ const staffMenu = [
 app.get("/api/menu/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
-  if (role === "staff") ret
+  if (role === "staff") return res.json(staffMenu);
+  res.status(400).send("دور غير معروف");
+});
+
+// ✅ السياسات للطلاب
+const studentPolicies = [
+  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
+  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
+  { title: "سياسة الحضور والانصراف", filename: "attendance_policy.pdf" },
+  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" }
+];
+
+// ✅ السياسات للموظفين
+const staffPolicies = [
+  { title: "سياسة التعاقد الوظيفي", filename: "employment_contract_policy.pdf" },
+  { title: "الميثاق المهني والأخلاقي", filename: "ethics_charter_policy.pdf" },
+  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
+  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" }
+];
+
+// ✅ API للسياسات
+app.get("/api/policies/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentPolicies);
+  if (role === "staff") return res.json(staffPolicies);
+  res.status(400).send("دور غير معروف");
+});
+
+// ✅ حماية ملفات PDF
+app.get("/api/pdfs/:filename", (req, res) => {
+  const safe = /^[a-zA-Z0-9_.-]+\.pdf$/;
+  const { filename } = req.params;
+  if (!safe.test(filename)) return res.status(400).send("اسم ملف غير صالح");
+  const filePath = path.join(__dirname, "pdfs", filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send("الملف غير موجود");
+  res.sendFile(filePath);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Running at http://localhost:${PORT}`));
