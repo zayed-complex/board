@@ -1,8 +1,9 @@
+// ✅ تحميل القائمة حسب الدور
 async function loadMenu(role) {
   try {
     const res = await fetch(`/api/menu/${role}`);
     if (!res.ok) throw new Error("خطأ في تحميل القائمة");
-    const menu = await res.json();
+    const menu = await res.json(); // مصفوفة مباشرة
 
     const container = document.getElementById("menuContainer");
     container.innerHTML = "";
@@ -23,16 +24,22 @@ async function loadMenu(role) {
       }
       container.appendChild(btn);
     });
+
+    if (!menu || menu.length === 0) {
+      container.innerHTML = "<p>لا توجد عناصر في القائمة</p>";
+    }
   } catch (err) {
     console.error("⚠ خطأ:", err);
     alert("تعذر تحميل القائمة");
   }
 }
 
+// ✅ فتح PDF
 function openPdf(filename) {
   window.location.href = `/api/pdfs/${filename}`;
 }
 
+// ✅ عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const role = params.get("role") || sessionStorage.getItem("role");
