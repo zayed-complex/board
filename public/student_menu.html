@@ -1,31 +1,49 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <title>لوحة تحكم الطالب / ولي الأمر</title>
-  <link rel="stylesheet" href="/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم الطالب</title>
+<style>
+body { font-family: Arial; text-align: center; padding: 50px; direction: rtl; }
+button { padding: 10px 20px; margin: 10px; font-size: 1em; cursor: pointer; }
+</style>
 </head>
 <body>
-  <div class="all-header">
-    <a href="javascript:history.back()" class="win-back-button">🔙 الرجوع</a>
-    <a href="#" onclick="exitApp()" class="win-exit-button">🔚 إنهاء</a>
-  </div>
+<h1>🎓 لوحة تحكم الطالب / ولي الأمر</h1>
+<div id="menuContainer"></div>
 
-  <div class="menu-page-container">
-    <h2 class="text-center">🎓 لوحة تحكم الطالب / ولي الأمر</h2>
-  </div>
+<script>
+const studentMenu = [
+  { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "التقارير الطلابية", type: "page", path: "/report.html" },
+  { title: "السياسات", type: "submenu", role: "student" }
+];
 
-  <div class="menu-boxes">
-    <div class="box">
-      <h3>📋 جداول مفيدة</h3>
-      <ul id="student-list"></ul>
-    </div>
-  </div>
+const container = document.getElementById("menuContainer");
 
-  <script src="/js/client.js"></script>
-  <script>
-    // تحميل القائمة من API ثم بناء الروابط كما في ملفاتك
-    renderMenu("/api/menu/student", document.getElementById("student-list"));
-  </script>
+studentMenu.forEach(item => {
+  const btn = document.createElement("button");
+  btn.textContent = item.title;
+
+  btn.onclick = () => {
+    switch(item.type) {
+      case "pdf":
+        window.open(`/api/pdfs/${item.filename}`, "_blank");
+        break;
+      case "page":
+        window.location.href = item.path;
+        break;
+      case "submenu":
+        window.location.href = `/policies.html?role=${item.role}`;
+        break;
+    }
+  };
+
+  container.appendChild(btn);
+});
+</script>
 </body>
 </html>

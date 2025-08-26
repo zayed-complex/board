@@ -1,24 +1,50 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <title>لوحة تحكم الموظف</title>
-  <link rel="stylesheet" href="/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم الموظف</title>
+<style>
+body { font-family: Arial; text-align: center; padding: 50px; direction: rtl; }
+button { padding: 10px 20px; margin: 10px; font-size: 1em; cursor: pointer; }
+</style>
 </head>
 <body>
-  <div class="all-header">
-    <a href="javascript:history.back()" class="win-back-button">🔙 الرجوع</a>
-    <a href="#" onclick="exitApp()" class="win-exit-button">🔚 إنهاء</a>
-  </div>
+<h1>💼 لوحة تحكم الموظف</h1>
+<div id="menuContainer"></div>
 
-  <div class="menu-page-container">
-    <div class="staff-header">
-      <h2 class="text-center">🧑‍🏫 لوحة تحكم الموظف</h2>
-    </div>
-    <div class="menu-boxes">
-      <div class="box">
-        <h3>📋 جداول مفيدة</h3>
-        <ul id="staff-list"></ul>
-      </div>
-    </div>
-  </div>
+<script>
+const staffMenu = [
+  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
+  { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
+  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "السياسات", type: "submenu", role: "staff" }
+];
+
+const container = document.getElementById("menuContainer");
+
+staffMenu.forEach(item => {
+  const btn = document.createElement("button");
+  btn.textContent = item.title;
+
+  btn.onclick = () => {
+    switch(item.type) {
+      case "pdf":
+        window.open(`/api/pdfs/${item.filename}`, "_blank");
+        break;
+      case "page":
+        window.location.href = item.path || "#";
+        break;
+      case "submenu":
+        window.location.href = `/policies.html?role=${item.role}`;
+        break;
+    }
+  };
+
+  container.appendChild(btn);
+});
+</script>
+</body>
+</html>

@@ -15,14 +15,11 @@ function selectRole(role) {
   }
 }
 
-// ربط الأزرار بعد تحميل الصفحة
+// ربط الأزرار بعد تحميل DOM
 document.addEventListener("DOMContentLoaded", () => {
-  const studentBtn = document.getElementById("studentBtn");
-  const staffBtn = document.getElementById("staffBtn");
-
-  studentBtn.addEventListener("click", () => selectRole("student"));
-  staffBtn.addEventListener("click", () => selectRole("staff"));
+  document.getElementById("studentBtn").addEventListener("click", () => selectRole("student"));
+  document.getElementById("staffBtn").addEventListener("click", () => selectRole("staff"));
 });
 
-// اجعل selectRole متاحة عالميًا (لأزرار HTML التقليدية إذا استُخدمت)
+// اجعل selectRole متاحة عالميًا
 window.selectRole = selectRole;
