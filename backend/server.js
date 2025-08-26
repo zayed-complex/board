@@ -6,47 +6,29 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// 🟢 تقديم الملفات الثابتة
 app.use(express.static(path.join(__dirname, "../public")));
 app.use("/pdfs", express.static(path.join(__dirname, "pdfs")));
 
-// 🟢 قوائم الطلاب
+// قوائم الطلاب
 const studentMenu = [
   { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
   { title: "التقارير الطلابية", type: "page", path: "/report.html" },
-  { title: "السياسات", type: "page", path: "/policies.html" },
+  { title: "السياسات", type: "submenu", role: "student" }
 ];
 
-// 🟢 قوائم الموظفين
+// قوائم الموظفين
 const staffMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
   { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "السياسات", type: "page", path: "/policies.html" },
+  { title: "السياسات", type: "submenu", role: "staff" }
 ];
 
-// 🟢 سياسات الطلاب
-const studentPolicies = [
-  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
-  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
-  { title: "سياسة الحضور والانصراف", filename: "attendance_policy.pdf" },
-  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
-];
-
-// 🟢 سياسات الموظفين
-const staffPolicies = [
-  { title: "سياسة التعاقد الوظيفي", filename: "employment_contract_policy.pdf" },
-  { title: "الميثاق المهني والأخلاقي", filename: "ethics_charter_policy.pdf" },
-  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
-  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
-];
-
-// 🟢 API للقوائم
+// API للقوائم
 app.get("/api/menu/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
@@ -54,7 +36,21 @@ app.get("/api/menu/:role", (req, res) => {
   res.status(400).send("دور غير معروف");
 });
 
-// 🟢 API للسياسات
+// API للسياسات
+const studentPolicies = [
+  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
+  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
+  { title: "سياسة الحضور والانصراف", filename: "attendance_policy.pdf" },
+  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" }
+];
+
+const staffPolicies = [
+  { title: "سياسة التعاقد الوظيفي", filename: "employment_contract_policy.pdf" },
+  { title: "الميثاق المهني والأخلاقي", filename: "ethics_charter_policy.pdf" },
+  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
+  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" }
+];
+
 app.get("/api/policies/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentPolicies);
@@ -62,7 +58,7 @@ app.get("/api/policies/:role", (req, res) => {
   res.status(400).send("دور غير معروف");
 });
 
-// 🟢 حماية أسماء ملفات PDF
+// حماية ملفات PDF
 app.get("/api/pdfs/:filename", (req, res) => {
   const safe = /^[a-zA-Z0-9_.-]+\.pdf$/;
   const { filename } = req.params;
@@ -72,8 +68,5 @@ app.get("/api/pdfs/:filename", (req, res) => {
   res.sendFile(filePath);
 });
 
-// 🟢 تشغيل الخادم
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`✅ Running at http://localhost:${PORT}`)
-);
+app.listen(PORT, () => console.log(`✅ Running at http://localhost:${PORT}`));

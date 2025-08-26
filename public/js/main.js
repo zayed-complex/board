@@ -1,103 +1,42 @@
-// إظهار شاشة تسجيل الدخول للموظف
-function showLogin() {
-  document.getElementById("startScreen").classList.add("hidden");
-  document.getElementById("loginScreen").classList.remove("hidden");
-  document.getElementById("username").value = "";
-  document.getElementById("password").value = "";
-  document.getElementById("username").focus();
-}
-// رجوع للشاشة الرئيسية
-function backToStart() {
-  document.getElementById("startScreen").classList.remove("hidden");
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("menuContainer").classList.add("hidden");
-  document.getElementById("viewerContainer").classList.add("hidden");
-}
+async function loadMenu(role) {
+  try {
+    const res = await fetch(`/api/menu/${role}`);
+    if (!res.ok) throw new Error("خطأ في تحميل القائمة");
+    const menu = await res.json();
 
-// دخول الطالب مباشرة بدون شاشة وسطية
-function enterStudent() {
-  // ✅ أول شيء نخفي شاشة البداية
-  document.getElementById("startScreen").classList.add("hidden");
+    const container = document.getElementById("menuContainer");
+    container.innerHTML = "";
 
-  // ✅ تحميل قائمة الطالب
-  fetch("/api/menu/student")
-    .then(res => res.json())
-    .then(data => showMenu(data.menu))
-    .catch(err => alert("⚠ خطأ في تحميل القائمة: " + err));
-}
+    (menu || []).forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "menu-btn";
+      btn.textContent = item.title;
 
-// تسجيل دخول الموظف
-function loginStaff() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        // ✅ نخفي شاشة البداية وتسجيل الدخول
-        document.getElementById("startScreen").classList.add("hidden");
-        document.getElementById("loginScreen").classList.add("hidden");
-
-        // ✅ نعرض القائمة الخاصة بالموظف
-        fetch("/api/menu/staff")
-          .then(res => res.json())
-          .then(data => showMenu(data.menu));
-      } else {
-        alert("❌ " + data.message);
+      if (item.type === "pdf") {
+        btn.onclick = () => openPdf(item.filename);
+      } else if (item.type === "page") {
+        btn.onclick = () => window.location.href = item.path;
+      } else if (item.type === "external") {
+        btn.onclick = () => window.open(item.url, "_blank");
+      } else if (item.type === "submenu") {
+        btn.onclick = () => window.location.href = `/policies.html?role=${role}`;
       }
-    })
-    .catch(err => alert("⚠ خطأ في تسجيل الدخول: " + err));
-}
-// عرض القائمة
-function showMenu(menu) {
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("menuContainer").classList.remove("hidden");
-
-  const list = document.getElementById("menuList");
-  list.innerHTML = "";
-
-  menu.forEach(item => {
-    const li = document.createElement("li");
-    const btn = document.createElement("button");
-    btn.className = "btn";
-    btn.textContent = item.title;
-
-    if (item.type === "pdf") {
-      btn.onclick = () => openPdf(item.filename);
-    } else if (item.type === "external") {
-      btn.onclick = () => window.open(item.url, "_blank");
-    } else if (item.type === "page") {
-      btn.onclick = () => window.location.href = item.path;
-    }
-
-    li.appendChild(btn);
-    list.appendChild(li);
-  });
+      container.appendChild(btn);
+    });
+  } catch (err) {
+    console.error("⚠ خطأ:", err);
+    alert("تعذر تحميل القائمة");
+  }
 }
 
-// فتح PDF داخل iframe
 function openPdf(filename) {
-  document.getElementById("menuContainer").classList.add("hidden");
-  const viewer = document.getElementById("viewerContainer");
-  const iframe = document.getElementById("pdfFrame");
-
-  iframe.src = `/pdfjs/web/viewer.html?file=/api/pdfs/${filename}`;
-  viewer.classList.remove("hidden");
+  window.location.href = `/api/pdfs/${filename}`;
 }
 
-// زر الرجوع من العارض
-document.getElementById("backButton").addEventListener("click", () => {
-  document.getElementById("viewerContainer").classList.add("hidden");
-  document.getElementById("menuContainer").classList.remove("hidden");
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get("role") || sessionStorage.getItem("role");
+  if (role) {
+    loadMenu(role);
+  }
 });
-
-// ربط الدوال بالنافذة العالمية لاستخدامها من HTML
-window.showLogin = showLogin;
-window.enterStudent = enterStudent;
-window.loginStaff = loginStaff;
-window.backToStart = backToStart;

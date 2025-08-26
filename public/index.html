@@ -1,74 +1,29 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم المتقدمة</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f9f9f9; direction:rtl; }
-    #roleSelector { margin-bottom: 20px; }
-    #menuContainer { max-width:500px; background:#fff; border:1px solid #ddd; border-radius:8px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    .menu-item { padding:12px 16px; cursor:pointer; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between; user-select:none; }
-    .menu-item:hover { background:#f0f0f0; }
-    .menu-icon { margin-right:10px; font-size:1.1em; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم بوابة مجمّع زايد التعليمي</title>
+<style>
+  body {
+    font-family: Arial; margin:0; padding:20px; background:#f9f9f9; direction:rtl; text-align:center;
+  }
+  #menuContainer {
+    max-width:400px; margin:auto; text-align:right;
+  }
+  .menu-btn {
+    padding:10px 15px; margin:5px 0; background:#fff; border-radius:6px; cursor:pointer;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1); transition:0.2s; width:100%; text-align:right;
+  }
+  .menu-btn:hover {
+    background:#e0e0e0;
+  }
+</style>
 </head>
 <body>
-<h2>لوحة التحكم المتقدمة</h2>
-<select id="roleSelector">
-  <option value="student">طالب</option>
-  <option value="staff">موظف</option>
-</select>
+<h2>لوحة تحكم بوابة مجمّع زايد التعليمي</h2>
 <div id="menuContainer"></div>
 
-<script>
-let currentRole = "student";
-
-async function fetchMenu(role){
-  const res = await fetch(`/api/menu/${role}`);
-  return res.json();
-}
-
-function createMenuItem(item){
-  const el = document.createElement("div");
-  el.className = "menu-item";
-
-  let icon = "";
-  if(item.type==="pdf") icon="📄";
-  else if(item.type==="page") icon="📑";
-  else if(item.type==="external") icon="🌐";
-
-  const titleSpan = document.createElement("span");
-  titleSpan.textContent = item.title;
-  const iconSpan = document.createElement("span");
-  iconSpan.textContent = icon;
-  iconSpan.className="menu-icon";
-  el.appendChild(iconSpan);
-  el.appendChild(titleSpan);
-
-  if(item.type==="pdf") el.onclick=()=>window.open(`/pdfs/${item.filename}`,"_blank");
-  else if(item.type==="page") el.onclick=()=>window.location.href=item.path + "?role=" + currentRole;
-  else if(item.type==="external") el.onclick=()=>window.open(item.url,"_blank");
-
-  return el;
-}
-
-async function renderMenu(role){
-  const container=document.getElementById("menuContainer");
-  container.innerHTML="";
-  const menu = await fetchMenu(role);
-  menu.forEach(item=>container.appendChild(createMenuItem(item)));
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  const selector=document.getElementById("roleSelector");
-  currentRole = selector.value;
-  renderMenu(currentRole);
-  selector.addEventListener("change",()=>{
-    currentRole = selector.value;
-    renderMenu(currentRole);
-  });
-});
-</script>
+<script src="main.js"></script>
 </body>
 </html>
