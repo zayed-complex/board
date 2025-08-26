@@ -1,31 +1,69 @@
-const CACHE_NAME = "school-cache-v1";
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/css/style.css",
-  "/js/main.js",
-  "/report.html"
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, "../public")));
+
+// Serve index.html at root
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "index.html"));
+});
+
+// ================================
+// Student and Staff menus
+// ================================
+const studentMenu = [
+  { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "التقارير الطلابية", type: "page", path: "/report.html" },
+  { title: "السياسات", type: "submenu", role: "student" }
 ];
 
-// Install
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-  );
+const staffMenu = [
+  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
+  { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
+  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "السياسات", type: "submenu", role: "staff" }
+];
+
+// ================================
+// API: get menu by role
+// ================================
+app.get("/api/menu/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentMenu);
+  if (role === "staff") return res.json(staffMenu);
+  res.status(400).send("دور غير معروف");
 });
 
-// Fetch (serve cached content when offline)
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
-  );
+// ================================
+// API: serve PDFs
+// ================================
+app.get("/api/pdfs/:filename", (req, res) => {
+  const safe = /^[a-zA-Z0-9_.-]+\.pdf$/;
+  const { filename } = req.params;
+
+  if (!safe.test(filename)) return res.status(400).send("اسم ملف غير صالح");
+
+  const filePath = path.join(__dirname, "pdfs", filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send("الملف غير موجود");
+
+  res.sendFile(filePath);
 });
 
-// Activate (clear old caches)
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))
-    )
-  );
+// ================================
+// Start server
+// ================================
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });
