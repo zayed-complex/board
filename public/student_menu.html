@@ -72,7 +72,73 @@ const studentMenu = [
 ];
 
 const container = document.getElementById("menuContainer");
+const pdfViewer = document.getElementById("pdfViewer");<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم الطالب</title>
+<style>
+body { font-family: Arial; text-align: center; padding: 30px; direction: rtl; background: #f4f6f8; }
+h1 { margin-bottom: 30px; color: #333; }
+#menuContainer { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+button.menu-btn { padding: 12px 20px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; background: #3498db; color: #fff; transition: all 0.2s ease-in-out; min-width: 200px; }
+button.menu-btn:hover { background: #217dbb; transform: translateY(-2px); }
+#pdfViewer { width: 90%; height: 600px; border: 1px solid #ccc; border-radius: 8px; margin: 20px auto; display: none; }
+</style>
+</head>
+<body>
+
+<h1>🎓 لوحة تحكم الطالب / ولي الأمر</h1>
+<div id="menuContainer"></div>
+<iframe id="pdfViewer"></iframe>
+
+<script>
+const studentMenu = [
+  { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "التقارير الطلابية", type: "page", path: "/report.html" },
+  { title: "السياسات", type: "submenu", role: "student" },
+  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
+  { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
+  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.ese.gov.ae/" }
+];
+
+const container = document.getElementById("menuContainer");
 const pdfViewer = document.getElementById("pdfViewer");
+
+studentMenu.forEach(item => {
+  const btn = document.createElement("button");
+  btn.className = "menu-btn";
+  btn.textContent = item.title;
+
+  btn.onclick = () => {
+    switch(item.type) {
+      case "pdf":
+        pdfViewer.src = `/pdfs/${item.filename}`; // direct from public
+        pdfViewer.style.display = "block";
+        pdfViewer.scrollIntoView({behavior: "smooth"});
+        break;
+      case "page":
+        window.location.href = item.path;
+        break;
+      case "submenu":
+        window.location.href = `/policies.html?role=${item.role}`;
+        break;
+      case "external":
+        window.open(item.url, "_blank");
+        break;
+    }
+  };
+
+  container.appendChild(btn);
+});
+</script>
+
+</body>
+</html>
+
 
 studentMenu.forEach(item => {
   const btn = document.createElement("button");

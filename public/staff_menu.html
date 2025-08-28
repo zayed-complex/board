@@ -5,59 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة تحكم الموظف</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  direction: rtl;
-  text-align: center;
-  background: #f4f6f8;
-  margin: 0;
-  padding: 30px;
-}
-h1 {
-  margin-bottom: 30px;
-  color: #333;
-}
-#menuContainer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-button.menu-btn {
-  padding: 12px 20px;
-  font-size: 1em;
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  background: #3498db; /* اللون الأزرق */
-  color: #fff;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: all 0.2s ease-in-out;
-  min-width: 200px;
-}
-button.menu-btn:hover {
-  background: #217dbb; /* أزرق أغمق عند التحويم */
-  transform: translateY(-2px);
-}
-#pdfViewer {
-  width: 90%;
-  height: 600px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  margin: auto;
-  display: none;
-}
+body { font-family: Arial; text-align: center; padding: 30px; direction: rtl; background: #f4f6f8; }
+h1 { margin-bottom: 30px; color: #333; }
+#menuContainer { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+button.menu-btn { padding: 12px 20px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; background: #3498db; color: #fff; transition: all 0.2s ease-in-out; min-width: 200px; }
+button.menu-btn:hover { background: #217dbb; transform: translateY(-2px); }
+#pdfViewer { width: 90%; height: 600px; border: 1px solid #ccc; border-radius: 8px; margin: 20px auto; display: none; }
 </style>
 </head>
 <body>
 
 <h1>💼 لوحة تحكم الموظف</h1>
-
 <div id="menuContainer"></div>
-
-<!-- PDF Viewer -->
 <iframe id="pdfViewer"></iframe>
 
 <script>
@@ -69,7 +28,7 @@ const staffMenu = [
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
   { title: "السياسات", type: "submenu", role: "staff" },
   { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
-  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/:x:/g/..." },
+  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
   { title: "رحلتي", type: "external", url: "https://idh.ese.gov.ae/" },
   { title: "المنهل", type: "external", url: "https://sis.ese.gov.ae/" },
   { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.ese.gov.ae/" }
@@ -86,7 +45,7 @@ staffMenu.forEach(item => {
   btn.onclick = () => {
     switch(item.type) {
       case "pdf":
-        pdfViewer.src = `/api/pdfs/${item.filename}`;
+        pdfViewer.src = `/pdfs/${item.filename}`; // direct from public
         pdfViewer.style.display = "block";
         pdfViewer.scrollIntoView({behavior: "smooth"});
         break;
