@@ -148,18 +148,21 @@ studentMenu.forEach(item => {
   btn.onclick = () => {
     switch(item.type) {
       case "pdf":
-        pdfViewer.src = `/pdfs/${item.filename}`;  // سريعة لأنها static
+        pdfViewer.src = `/pdfs/${item.filename}`; // سريع لأنه static
         pdfViewer.style.display = "block";
         pdfViewer.scrollIntoView({ behavior: "smooth" });
         break;
+
       case "page":
         window.location.href = item.path;
         break;
+
       case "submenu":
         window.location.href = `/policies.html?role=${item.role}`;
         break;
+
       case "external":
-        window.open(item.url, "_blank");
+        window.open(item.url, "_blank"); // فتح الرابط في نافذة جديدة
         break;
     }
   };
