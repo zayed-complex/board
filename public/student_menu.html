@@ -148,9 +148,9 @@ studentMenu.forEach(item => {
   btn.onclick = () => {
     switch(item.type) {
       case "pdf":
-        pdfViewer.src = `/api/pdfs/${item.filename}`;
+        pdfViewer.src = `/pdfs/${item.filename}`;  // سريعة لأنها static
         pdfViewer.style.display = "block";
-        pdfViewer.scrollIntoView({behavior: "smooth"});
+        pdfViewer.scrollIntoView({ behavior: "smooth" });
         break;
       case "page":
         window.location.href = item.path;
@@ -166,6 +166,7 @@ studentMenu.forEach(item => {
 
   container.appendChild(btn);
 });
+
 </script>
 
 </body>
