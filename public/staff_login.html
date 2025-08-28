@@ -4,26 +4,97 @@
   <meta charset="UTF-8" />
   <title>تسجيل دخول الموظف</title>
   <link rel="stylesheet" href="/style.css" />
+  <style>
+    body {
+      font-family: "Tahoma", "Arial", sans-serif;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 360px;
+      text-align: center;
+    }
+
+    .login-header h2 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 22px;
+    }
+
+    .login-form label {
+      display: block;
+      text-align: right;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #444;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border 0.3s;
+    }
+
+    .login-form input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .login-form button:hover {
+      background: #0056b3;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #f5c6cb;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <div class="all-header">
-    <a href="javascript:history.back()" class="win-back-button">🔙 الرجوع</a>
-    <a href="#" onclick="exitApp()" class="win-exit-button">🔚 إنهاء</a>
-  </div>
 
   <div class="login-container">
     <div class="login-header">
-      <h2 class="text-center">تسجيل دخول الموظف</h2>
+      <h2>تسجيل دخول الموظف</h2>
     </div>
 
     <div id="error" class="error" style="display:none"></div>
 
     <form id="loginForm" class="login-form" dir="rtl">
       <label for="username">اسم المستخدم:</label>
-      <input type="text" id="username" required />
+      <input type="text" id="username" placeholder="أدخل اسم المستخدم" required />
 
       <label for="password">كلمة المرور:</label>
-      <input type="password" id="password" required />
+      <input type="password" id="password" placeholder="أدخل كلمة المرور" required />
 
       <button type="submit">تسجيل الدخول</button>
     </form>
@@ -42,6 +113,20 @@
         showError(res.message || "خطأ غير معروف");
       }
     });
+
+    function showError(msg) {
+      const errorDiv = document.getElementById("error");
+      errorDiv.innerText = msg;
+      errorDiv.style.display = "block";
+    }
+    async function apiPost(url, data) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      return res.json();
+    }
   </script>
 </body>
 </html>

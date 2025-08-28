@@ -1,41 +1,101 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>السياسات</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#f7f9fc; text-align:center; padding:20px; direction:rtl; }
-    h2 { margin-bottom:20px; }
-    .menu-btn { padding:10px 15px; margin:5px; background:#fff; border-radius:6px; cursor:pointer;
-      box-shadow:0 1px 3px rgba(0,0,0,0.1); transition:0.2s; display:block; width:250px; margin:auto; }
-    .menu-btn:hover { background:#e0e0e0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>السياسات</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  text-align:center;
+  padding:30px;
+  direction:rtl;
+}
+h2 {
+  margin-bottom:25px;
+  color:#333;
+}
+#policiesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap:15px;
+}
+.menu-btn {
+  padding:12px 20px;
+  font-size:1em;
+  cursor:pointer;
+  border:none;
+  border-radius:8px;
+  background:#3498db;
+  color:#fff;
+  box-shadow:0 4px 6px rgba(0,0,0,0.1);
+  transition:0.2s;
+  min-width:200px;
+}
+.menu-btn:hover {
+  background:#217dbb;
+  transform: translateY(-2px);
+}
+</style>
 </head>
 <body>
-  <h2>السياسات</h2>
-  <div id="policiesContainer"></div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const role = params.get("role") || sessionStorage.getItem("role");
+<h2>السياسات</h2>
+<div id="policiesContainer"></div>
 
-    fetch(`/api/policies/${role}`)
-      .then(res => res.json())
-      .then(policies => {
-        const container = document.getElementById("policiesContainer");
-        container.innerHTML = "";
-        policies.forEach(p => {
-          const btn = document.createElement("button");
-          btn.textContent = p.title;
-          btn.className = "menu-btn";
-          btn.onclick = () => window.location.href = `/api/pdfs/${p.filename}`;
-          container.appendChild(btn);
-        });
-      })
-      .catch(err => {
-        document.getElementById("policiesContainer").innerHTML = "<p>تعذر تحميل السياسات</p>";
-      });
-  </script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const role = (params.get("role") || sessionStorage.getItem("role") || "").toLowerCase();
+const container = document.getElementById("policiesContainer");
+
+function showMsg(html) {
+  container.innerHTML = html;
+}
+
+async function loadPolicies() {
+  if(!role){
+    showMsg(`
+      <p>لم يتم تحديد الدور.</p>
+      <button class="menu-btn" onclick="window.location.href='/'">العودة للصفحة الرئيسية</button>
+    `);
+    return;
+  }
+
+  showMsg("<p>جارٍ التحميل…</p>");
+
+  try {
+    const res = await fetch(`/api/policies/${role}`);
+    if(!res.ok){
+      const text = await res.text();
+      showMsg(`<p>تعذر تحميل السياسات (${res.status})</p><small>${text}</small>`);
+      return;
+    }
+
+    const policies = await res.json();
+    if(!Array.isArray(policies) || policies.length===0){
+      showMsg("<p>لا توجد سياسات متاحة حالياً.</p>");
+      return;
+    }
+
+    container.innerHTML = "";
+
+    policies.forEach(p => {
+      const btn = document.createElement("button");
+      btn.textContent = p.title;
+      btn.className = "menu-btn";
+      btn.onclick = () => window.location.href = `/api/pdfs/${p.filename}`;
+      container.appendChild(btn);
+    });
+
+  } catch(err){
+    showMsg(`<p>تعذر تحميل السياسات</p><small>${err?.message || err}</small>`);
+  }
+}
+
+loadPolicies();
+</script>
+
 </body>
 </html>

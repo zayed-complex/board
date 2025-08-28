@@ -4,45 +4,114 @@
   <meta charset="UTF-8">
   <title>تقرير الطالب</title>
   <style>
+    body {
+      font-family: "Cairo", Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(90deg, #0066cc, #004080);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: bold;
+    }
+    input {
+      padding: 10px;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #004080;
+    }
+    .info-box {
+      background: #f1f7ff;
+      border: 1px solid #d0e4ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-size: 16px;
+    }
     table {
-      border-collapse: collapse;
       width: 100%;
+      border-collapse: collapse;
       margin-top: 20px;
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
+      border: 1px solid #ddd;
       text-align: center;
     }
     th {
-      background-color: #f2f2f2;
+      background-color: #0066cc;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .back-btn {
+      margin-top: 20px;
+      background-color: #6c757d;
+    }
+    .back-btn:hover {
+      background-color: #495057;
     }
   </style>
 </head>
 <body>
-  <h2>تقرير الطالب</h2>
+  <header>📊 تقرير الطالب</header>
 
-  <label>أدخل رقم الهوية:</label>
-  <input type="text" id="studentId" placeholder="123"><br><br>
-  <button onclick="loadReport()">عرض التقرير</button>
+  <div class="container">
+    <label>أدخل رقم الهوية:</label>
+    <input type="text" id="studentId" placeholder="784xxxxxxxxxxxx">
+    <button onclick="loadReport()">عرض التقرير</button>
 
-  <div id="studentInfo"></div>
-  <table id="subjectsTable" style="display:none;">
-    <thead>
-      <tr>
-        <th>المادة</th>
-        <th>التقويم</th>
-        <th>الأكاديمي</th>
-        <th>المشاركة</th>
-        <th>Alef</th>
-        <th>السلوك</th>
-        <th>الالتزام</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <div id="studentInfo" class="info-box" style="display:none;"></div>
 
-  <button onclick="window.history.back()">⬅️ رجوع</button>
+    <table id="subjectsTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>المادة</th>
+          <th>الاختبار التكويني</th>
+          <th>المستوى الأكاديمي</th>
+          <th>المشاركة</th>
+          <th>إنجاز المهام</th>
+          <th>السلوك</th>
+          <th>الالتزام والحضور</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+  </div>
 
   <script>
     async function loadReport() {
@@ -52,7 +121,6 @@
         return;
       }
 
-      // ✅ تعديل المسار
       const res = await fetch("/api/report/" + id);
       if (!res.ok) {
         alert("الطالب غير موجود");
@@ -62,8 +130,14 @@
       const data = await res.json();
 
       // عرض بيانات الطالب
-      document.getElementById("studentInfo").innerHTML = 
-        "<p><b>الاسم:</b> " + (data.student["الاسم"] || "-") + "</p>";
+      const infoDiv = document.getElementById("studentInfo");
+      infoDiv.style.display = "block";
+          infoDiv.innerHTML = `
+           <div style="display:flex; gap:40px;">
+            <p><b>الاسم:</b> ${data.student["الاسم"] || "-"}</p>
+            <p><b>الشعبة:</b> ${data.student["الشعبة"] || "-"}</p>
+           </div>
+           `;
 
       // عرض المواد
       const tbody = document.querySelector("#subjectsTable tbody");
