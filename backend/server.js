@@ -52,7 +52,7 @@ const studentPolicies = [
   { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
   { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
   { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
-  { title: "سياسة الحضور والانصراف", filename: "attendance_policy.pdf" }
+  { title: "سياسة الحضور والغياب", filename: "attendance_policy.pdf" }
 ];
 
 const staffPolicies = [
