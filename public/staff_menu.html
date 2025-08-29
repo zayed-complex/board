@@ -1,17 +1,48 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة تحكم الموظف</title>
-<style>
-body { font-family: Arial; text-align: center; padding: 30px; direction: rtl; background: #f4f6f8; }
-h1 { margin-bottom: 30px; color: #333; }
-#menuContainer { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-button.menu-btn { padding: 12px 20px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; background: #3498db; color: #fff; transition: all 0.2s ease-in-out; min-width: 200px; }
-button.menu-btn:hover { background: #217dbb; transform: translateY(-2px); }
-#pdfViewer { width: 90%; height: 600px; border: 1px solid #ccc; border-radius: 8px; margin: 20px auto; display: none; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم الموظف</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #f4f6f8;
+    }
+    h1 { margin-bottom: 30px; color: #333; }
+    #menuContainer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+    .menu-btn {
+      padding: 12px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #3498db;
+      color: #fff;
+      transition: 0.2s;
+      min-width: 200px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .menu-btn:hover {
+      background: #217dbb;
+      transform: translateY(-2px);
+    }
+    #pdfViewer {
+      width: 90%;
+      height: 600px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin: 20px auto;
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -45,9 +76,10 @@ staffMenu.forEach(item => {
   btn.onclick = () => {
     switch(item.type) {
       case "pdf":
-        pdfViewer.src = `/pdfs/${item.filename}`; // direct from public
+        // ✅ عرض PDF داخل pdf.js viewer
+        pdfViewer.src = `/pdfjs/web/viewer.html?file=/pdfs/${item.filename}`;
         pdfViewer.style.display = "block";
-        pdfViewer.scrollIntoView({behavior: "smooth"});
+        pdfViewer.scrollIntoView({ behavior: "smooth" });
         break;
       case "submenu":
         window.location.href = `/policies.html?role=${item.role}`;
