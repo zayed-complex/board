@@ -1,50 +1,59 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة تحكم الطالب</title>
-<style>
-body { font-family: Arial; text-align: center; padding: 30px; direction: rtl; background: #f4f6f8; }
-h1 { margin-bottom: 30px; color: #333; }
-#menuContainer { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-button.menu-btn { padding: 12px 20px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; background: #3498db; color: #fff; transition: all 0.2s ease-in-out; min-width: 200px; }
-button.menu-btn:hover { background: #217dbb; transform: translateY(-2px); }
-#pdfViewer { width: 90%; height: 600px; border: 1px solid #ccc; border-radius: 8px; margin: 20px auto; display: none; }
-</style>
+  <meta charset="UTF-8">
+  <title>🎓 لوحة تحكم الطالب / ولي الأمر</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      text-align: center;
+      padding: 30px;
+    }
+    h2 { margin-bottom: 25px; color: #333; }
+    #studentMenu { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+    .menu-btn {
+      padding: 12px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #3498db;
+      color: #fff;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: 0.2s;
+      min-width: 200px;
+    }
+    .menu-btn:hover {
+      background: #217dbb;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 <body>
 
-<h1>🎓 لوحة تحكم الطالب / ولي الأمر</h1>
-<div id="menuContainer"></div>
-<iframe id="pdfViewer"></iframe>
+<h2>🎓 لوحة تحكم الطالب / ولي الأمر</h2>
+<div id="studentMenu"></div>
 
 <script>
 const studentMenu = [
-  { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
-  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "التقارير الطلابية", type: "page", path: "/report.html" },
+  { title: "حقوق الطفل", type: "pdf", filename: "child_rights_policy.pdf" },
+  { title: "الدليل الأكاديمي", type: "pdf", filename: "academic_guide.pdf" },
   { title: "السياسات", type: "submenu", role: "student" },
-  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
-  { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
-  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.ese.gov.ae/" }
+  { title: "الموقع الرسمي", type: "external", url: "https://example.com" }
 ];
 
-const container = document.getElementById("menuContainer");
-const pdfViewer = document.getElementById("pdfViewer");
+const container = document.getElementById("studentMenu");
 
 studentMenu.forEach(item => {
   const btn = document.createElement("button");
   btn.className = "menu-btn";
   btn.textContent = item.title;
-
   btn.onclick = () => {
     switch(item.type) {
       case "pdf":
-        pdfViewer.src = `/pdfs/${item.filename}`; // direct from public
-        pdfViewer.style.display = "block";
-        pdfViewer.scrollIntoView({behavior: "smooth"});
+        // ✅ فتح PDF عبر PDF.js
+        window.location.href = `/pdfjs/web/viewer.html?file=/pdfs/${item.filename}`;
         break;
       case "page":
         window.location.href = item.path;
@@ -57,7 +66,6 @@ studentMenu.forEach(item => {
         break;
     }
   };
-
   container.appendChild(btn);
 });
 </script>

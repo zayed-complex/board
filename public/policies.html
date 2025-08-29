@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,8 @@ body {
   background:#f4f6f8;
   text-align:center;
   padding:30px;
-  direction:rtl;
 }
-h2 {
-  margin-bottom:25px;
-  color:#333;
-}
+h2 { margin-bottom:25px; color:#333; }
 #policiesContainer {
   display: flex;
   flex-wrap: wrap;
@@ -50,9 +46,7 @@ const params = new URLSearchParams(window.location.search);
 const role = (params.get("role") || sessionStorage.getItem("role") || "").toLowerCase();
 const container = document.getElementById("policiesContainer");
 
-function showMsg(html) {
-  container.innerHTML = html;
-}
+function showMsg(html) { container.innerHTML = html; }
 
 async function loadPolicies() {
   if(!role){
@@ -80,12 +74,14 @@ async function loadPolicies() {
     }
 
     container.innerHTML = "";
-
     policies.forEach(p => {
       const btn = document.createElement("button");
       btn.textContent = p.title;
       btn.className = "menu-btn";
-      btn.onclick = () => window.location.href = `/pdfs/${p.filename}`;
+      btn.onclick = () => {
+        // ✅ عرض السياسات عبر PDF.js
+        window.location.href = `/pdfjs/web/viewer.html?file=/pdfs/${p.filename}`;
+      };
       container.appendChild(btn);
     });
 
