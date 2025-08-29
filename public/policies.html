@@ -85,7 +85,7 @@ async function loadPolicies() {
       const btn = document.createElement("button");
       btn.textContent = p.title;
       btn.className = "menu-btn";
-      btn.onclick = () => window.location.href = `/api/pdfs/${p.filename}`;
+      btn.onclick = () => window.location.href = `/pdfs/${p.filename}`;
       container.appendChild(btn);
     });
 
