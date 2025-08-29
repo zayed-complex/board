@@ -183,5 +183,5 @@ app.post("/api/login", (req, res) => {
 // 9) تشغيل السيرفر
 // ==================================================
 app.listen(PORT, () => {
-  console.log(`🚀 السيرفر يعمل على: http://localhost:${PORT}`);
+  console.log(`🚀 Server works on: http://localhost:${PORT}`);
 });
