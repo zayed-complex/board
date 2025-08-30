@@ -8,6 +8,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, "../public"), {
+  etag: false,
+  maxAge: 0
+}));
+
+
 // ==================================================
 // 1) ملفات ثابتة (HTML, CSS, JS, PDF)
 // ==================================================
