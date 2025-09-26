@@ -8,28 +8,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, "../public"), {
-  etag: false,
-  maxAge: 0
-}));
+// Serve static files
+app.use(express.static(path.join(__dirname, "../public"), { etag: false, maxAge: 0 }));
+app.use(express.static(path.join(__dirname, "../public"))); // pdfs in public
 
-
-// ==================================================
-// 1) ملفات ثابتة (HTML, CSS, JS, PDF)
-// ==================================================
-app.use(express.static(path.join(__dirname, "../public"))); // public تحتوي على pdfs
-
-// ==================================================
-// 2) مستخدمو الموظفين
-// ==================================================
+// ===================== STAFF USERS =====================
 const STAFF_USERS = [
   { username: "admin", password: "1234" },
   { username: "staff", password: "abcd" }
 ];
 
-// ==================================================
-// 3) قوائم الطلاب والموظفين
-// ==================================================
+// ===================== MENUS =====================
 const studentMenu = [
   { title: "الإعلانات", page: "announcements.html" },
   { title: "الأنشطة الطلابية", page: "activities.html" },
@@ -46,12 +35,10 @@ app.get("/api/menu/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
   if (role === "staff") return res.json(staffMenu);
-  res.status(400).send("❌ دور غير معروف");
+  return res.status(400).send("❌ دور غير معروف");
 });
 
-// ==================================================
-// 4) السياسات
-// ==================================================
+// ===================== POLICIES =====================
 const studentPolicies = [
   { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
   { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
@@ -76,35 +63,32 @@ app.get("/api/policies/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentPolicies);
   if (role === "staff") return res.json(staffPolicies);
-  res.status(400).send("❌ دور غير معروف");
+  return res.status(400).send("❌ دور غير معروف");
 });
 
-// ==================================================
-// 5) API لتقديم ملفات PDF
-// ==================================================
+// ===================== PDF FILES =====================
 app.get("/api/pdfs/:filename", (req, res) => {
-  const filePath = path.join(__dirname, "../public/pdfs", req.params.filename);
+  const safeFile = /^[\w.-]+\.pdf$/; // prevent path traversal
+  const { filename } = req.params;
+  if (!safeFile.test(filename)) return res.status(400).send("❌ اسم ملف غير صالح");
+
+  const filePath = path.join(__dirname, "../public/pdfs", filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send("❌ الملف غير موجود");
+
   res.sendFile(filePath, (err) => {
-    if (err) res.status(404).send("❌ الملف غير موجود");
+    if (err) {
+      console.error("❌ Error sending PDF:", err);
+      if (!res.headersSent) return res.status(500).send("❌ حدث خطأ أثناء إرسال الملف");
+    }
   });
 });
 
-// ==================================================
-// 6) إعداد Excel و تحميل بيانات الطلاب
-// ==================================================
+// ===================== EXCEL STUDENT REPORTS =====================
 const EXCEL_PATH = path.join(__dirname, "data", "students.xlsx");
-
 const subject_names = [
-  "اللغة العربية",
-  "اللغة الإنجليزية",
-  "التربية الإسلامية",
-  "الرياضيات",
-  "العلوم",
-  "الدراسات الاجتماعية",
-  "التصميم والتكنولوجيا",
-  "الأحياء",
-  "الفيزياء",
-  "الكيمياء"
+  "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
+  "العلوم","الدراسات الاجتماعية","التصميم والتكنولوجيا",
+  "الأحياء","الفيزياء","الكيمياء"
 ];
 
 function loadStudentsFromExcel() {
@@ -112,25 +96,23 @@ function loadStudentsFromExcel() {
     console.warn("⚠️ ملف Excel غير موجود:", EXCEL_PATH);
     return {};
   }
-
   const workbook = xlsx.readFile(EXCEL_PATH);
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
   const rows = xlsx.utils.sheet_to_json(sheet, { defval: "-" });
 
   const students = {};
-
   rows.forEach((row) => {
-    const possibleIdKeys = ["ID","Id","id","الهوية","رقم الهوية","NationalID"];
-    let id = possibleIdKeys.map(k => row[k]).find(v => v && String(v).trim() !== "");
+    const id = ["ID","Id","id","الهوية","رقم الهوية","NationalID"]
+      .map(k => row[k]).find(v => v && String(v).trim() !== "");
     if (!id) return;
-    id = String(id).trim();
+    const studentId = String(id).trim();
 
-    const possibleNameKeys = ["الاسم","اسم","Name","student_name"];
-    let name = possibleNameKeys.map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
+    const name = ["الاسم","اسم","Name","student_name"]
+      .map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
 
-    const possibleClassKeys = ["الشعبة","Class","الفصل"];
-    let className = possibleClassKeys.map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
+    const className = ["الشعبة","Class","الفصل"]
+      .map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
 
     const allCols = Object.keys(row);
     const dataCols = allCols.slice(4);
@@ -148,7 +130,7 @@ function loadStudentsFromExcel() {
       };
     });
 
-    students[id] = {
+    students[studentId] = {
       student: { "الاسم": String(name).trim(), "الشعبة": String(className).trim() },
       subjects
     };
@@ -162,32 +144,26 @@ console.log(`✅ Loaded ${Object.keys(studentReports).length} student reports.`)
 
 app.post("/api/reload-students", (req, res) => {
   studentReports = loadStudentsFromExcel();
-  res.json({ ok: true, count: Object.keys(studentReports).length });
+  return res.json({ ok: true, count: Object.keys(studentReports).length });
 });
 
-// ==================================================
-// 7) API لتقرير طالب واحد
-// ==================================================
+// ===================== SINGLE STUDENT REPORT =====================
 app.get("/api/report/:id", (req, res) => {
   const id = String(req.params.id).trim();
   const report = studentReports[id];
   if (!report) return res.status(404).send("❌ الطالب غير موجود");
-  res.json(report);
+  return res.json(report);
 });
 
-// ==================================================
-// 8) تسجيل الدخول
-// ==================================================
+// ===================== LOGIN =====================
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
-  const user = STAFF_USERS.find(u => u.username===username && u.password===password);
-  if (user) res.json({ success: true });
-  else res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
+  const user = STAFF_USERS.find(u => u.username === username && u.password === password);
+  if (user) return res.json({ success: true });
+  return res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
 });
 
-// ==================================================
-// 9) تشغيل السيرفر
-// ==================================================
+// ===================== START SERVER =====================
 app.listen(PORT, () => {
   console.log(`🚀 Server works on: http://localhost:${PORT}`);
 });
