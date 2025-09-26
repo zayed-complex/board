@@ -1,61 +1,83 @@
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
-const cors = require("cors");
+// service-worker.js
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const CACHE_NAME = 'my-app-cache-v2';
 
-// ✅ Serve static files
-app.use(express.static(path.join(__dirname, "../public")));
-
-// ✅ Serve index.html explicitly
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "index.html"));
-});
-
-// ✅ قوائم الطلاب
-const studentMenu = [
-  { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
-  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "التقارير الطلابية", type: "page", path: "/report.html" },
-  { title: "السياسات", type: "submenu", role: "student" }
+// List of static assets to cache
+const FILES_TO_CACHE = [
+  '/',
+  '/app.js',
+  '/style.css',
+  // Add other static assets here
 ];
 
-// ✅ قوائم الموظفين
-const staffMenu = [
-  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
-  { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
-  { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
-  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "السياسات", type: "submenu", role: "staff" }
+// List of PDFs to pre-cache (from your menus)
+const PDF_FILES_TO_CACHE = [
+  '/api/pdfs/cycle2.pdf',
+  '/api/pdfs/cycle3.pdf',
+  '/api/pdfs/timings.pdf',
+  '/api/pdfs/teachers.pdf',
+  '/api/pdfs/duties.pdf'
 ];
 
-// ✅ API للقوائم
-app.get("/api/menu/:role", (req, res) => {
-  const { role } = req.params;
-  if (role === "student") return res.json(studentMenu);
-  if (role === "staff") return res.json(staffMenu);
-  res.status(400).send("دور غير معروف");
+// Install event: cache static assets + PDFs
+self.addEventListener('install', (event) => {
+  console.log('[ServiceWorker] Installing and caching assets...');
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll([...FILES_TO_CACHE, ...PDF_FILES_TO_CACHE]);
+    })
+  );
+  self.skipWaiting();
 });
 
-// ✅ حماية ملفات PDF
-app.get("/api/pdfs/:filename", (req, res) => {
-  const safe = /^[a-zA-Z0-9_.-]+\.pdf$/;
-  const { filename } = req.params;
-  if (!safe.test(filename)) return res.status(400).send("اسم ملف غير صالح");
-
-  const filePath = path.join(__dirname, "pdfs", filename);
-  if (!fs.existsSync(filePath)) return res.status(404).send("الملف غير موجود");
-
-  res.sendFile(filePath);
+// Activate event: cleanup old caches
+self.addEventListener('activate', (event) => {
+  console.log('[ServiceWorker] Activating...');
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('[ServiceWorker] Removing old cache:', key);
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
 });
 
-// ✅ Start server
-const PORT = 3000;
-app.listen(PORT, () =>
-  console.log(`✅ Server running at http://localhost:${PORT}`)
-);
+// Fetch event: serve cached files first
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Only handle GET requests
+  if (request.method !== 'GET') return;
+
+  // Serve PDF requests or any cached requests
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+
+      // Fetch from network if not in cache
+      return fetch(request).then((response) => {
+        // Optionally cache newly fetched PDFs
+        if (request.url.includes('/api/pdfs/')) {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, response.clone());
+          });
+        }
+        return response;
+      }).catch(() => {
+        // Fallback for offline PDFs
+        if (request.url.includes('/api/pdfs/')) {
+          return new Response('PDF not available offline', {
+            status: 503,
+            statusText: 'Service Unavailable'
+          });
+        }
+      });
+    })
+  );
+});
