@@ -71,6 +71,7 @@
   <button id="downloadBtn">⬇ تحميل PDF</button>
 </div>
 
+<script src="download.js"></script>
 <script>
 const staffMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
@@ -97,12 +98,16 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 // Track the currently opened PDF
 let currentPdfUrl = null;
 
+// Generate menu buttons dynamically
 staffMenu.forEach(item => {
   const btn = document.createElement("button");
   btn.className = "menu-btn";
   btn.textContent = item.title;
 
   btn.onclick = () => {
+    // Hide download button by default
+    downloadContainer.style.display = "none";
+
     switch(item.type) {
       case "pdf":
         currentPdfUrl = `/api/pdfs/${item.filename}`;
@@ -128,21 +133,36 @@ staffMenu.forEach(item => {
 });
 
 // Download button functionality
-downloadBtn.onclick = (e) => {
+downloadBtn.onclick = async (e) => {
   e.preventDefault();
   if (!currentPdfUrl) return;
 
+  const filename = currentPdfUrl.split("/").pop();
+
   if (isIOS) {
-    // Open PDF in new tab on iOS for manual save
+    // Open PDF in new tab for iOS users
     window.open(currentPdfUrl, "_blank");
   } else {
-    // Force download on desktop & Android
-    const link = document.createElement("a");
-    link.href = currentPdfUrl;
-    link.download = currentPdfUrl.split("/").pop();
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Fetch PDF and trigger download
+    try {
+      const res = await fetch(currentPdfUrl);
+      if (!res.ok) throw new Error("PDF not available");
+
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+
+      console.log(`✅ PDF downloaded: ${filename}`);
+    } catch (err) {
+      console.error("❌ Download failed:", err);
+      alert("لا يمكن تحميل الملف حالياً. حاول لاحقاً.");
+    }
   }
 };
 </script>
