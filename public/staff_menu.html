@@ -91,10 +91,10 @@ const pdfViewer = document.getElementById("pdfViewer");
 const downloadContainer = document.getElementById("pdfDownloadContainer");
 const downloadBtn = document.getElementById("downloadBtn");
 
-// Detect iOS for mobile Safari
+// Detect iOS
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-// Current PDF URL (needed for download)
+// Keep track of current PDF
 let currentPdfUrl = null;
 
 staffMenu.forEach(item => {
@@ -105,8 +105,7 @@ staffMenu.forEach(item => {
   btn.onclick = () => {
     switch(item.type) {
       case "pdf":
-        // PDF.js viewer
-        currentPdfUrl = `/pdfs/${item.filename}`;
+        currentPdfUrl = `/public/pdfs/${item.filename}`;
         pdfViewer.src = `/pdfjs/web/viewer.html?file=${currentPdfUrl}`;
         pdfViewer.style.display = "block";
         pdfViewer.scrollIntoView({ behavior: "smooth" });
@@ -128,13 +127,13 @@ staffMenu.forEach(item => {
   container.appendChild(btn);
 });
 
-// Download button handler
+// Mobile-friendly download
 downloadBtn.onclick = (e) => {
   e.preventDefault();
   if (!currentPdfUrl) return;
 
   if (isIOS) {
-    // Mobile Safari: open in new tab, user can "Save to Files"
+    // iOS: open PDF in new tab for manual save
     window.open(currentPdfUrl, "_blank");
   } else {
     // Desktop & Android: trigger download
