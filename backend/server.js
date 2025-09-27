@@ -75,10 +75,13 @@ app.get("/api/pdfs/:filename", (req, res) => {
   const filePath = path.join(__dirname, "../public/pdfs", filename);
   if (!fs.existsSync(filePath)) return res.status(404).send("❌ الملف غير موجود");
 
-  res.sendFile(filePath, (err) => {
+  // Force download (works for mobile & web)
+  res.download(filePath, filename, (err) => {
     if (err) {
-      console.error("❌ Error sending PDF:", err);
-      if (!res.headersSent) return res.status(500).send("❌ حدث خطأ أثناء إرسال الملف");
+      console.error("❌ Error downloading PDF:", err);
+      if (!res.headersSent) return res.status(500).send("❌ حدث خطأ أثناء تنزيل الملف");
+    } else {
+      console.log(`✅ PDF downloaded: ${filename}`);
     }
   });
 });
