@@ -71,7 +71,6 @@
   <button id="downloadBtn">⬇ تحميل PDF</button>
 </div>
 
-<script src="download.js"></script>
 <script>
 const staffMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
@@ -92,20 +91,22 @@ const pdfViewer = document.getElementById("pdfViewer");
 const downloadContainer = document.getElementById("pdfDownloadContainer");
 const downloadBtn = document.getElementById("downloadBtn");
 
-// Detect iOS for mobile Safari
+// Detect iOS Safari (special case, no forced downloads)
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-// Track the currently opened PDF
+// Detect if running inside MIT App Inventor WebViewer (it has a specific User-Agent)
+const isWebView = /(wv|WebView|; wv)/i.test(navigator.userAgent);
+
+// Track opened PDF
 let currentPdfUrl = null;
 
-// Generate menu buttons dynamically
+// Create menu dynamically
 staffMenu.forEach(item => {
   const btn = document.createElement("button");
   btn.className = "menu-btn";
   btn.textContent = item.title;
 
   btn.onclick = () => {
-    // Hide download button by default
     downloadContainer.style.display = "none";
 
     switch(item.type) {
@@ -115,7 +116,6 @@ staffMenu.forEach(item => {
         pdfViewer.style.display = "block";
         pdfViewer.scrollIntoView({ behavior: "smooth" });
 
-        // Show download button
         downloadContainer.style.display = "block";
         break;
 
@@ -132,18 +132,18 @@ staffMenu.forEach(item => {
   container.appendChild(btn);
 });
 
-// Download button functionality
+// Handle download
 downloadBtn.onclick = async (e) => {
   e.preventDefault();
   if (!currentPdfUrl) return;
 
   const filename = currentPdfUrl.split("/").pop();
 
-  if (isIOS) {
-    // Open PDF in new tab for iOS users
+  if (isIOS || isWebView) {
+    // iOS & MIT App Inventor WebView → open in new tab for manual download
     window.open(currentPdfUrl, "_blank");
   } else {
-    // Fetch PDF and trigger download
+    // Desktop & Android Chrome → force download
     try {
       const res = await fetch(currentPdfUrl);
       if (!res.ok) throw new Error("PDF not available");
