@@ -10,7 +10,6 @@ app.use(express.json());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "../public"), { etag: false, maxAge: 0 }));
-app.use(express.static(path.join(__dirname, "../public"))); // pdfs in public
 
 // ===================== STAFF USERS =====================
 const STAFF_USERS = [
@@ -66,27 +65,32 @@ app.get("/api/policies/:role", (req, res) => {
   return res.status(400).send("❌ دور غير معروف");
 });
 
-// ===================== PDF FILES =====================
+// ===================== PDF FILES (streaming) =====================
 app.get("/api/pdfs/:filename", (req, res) => {
-  const safeFile = /^[\w.-]+\.pdf$/; // prevent path traversal
+  const safeFile = /^[\w.-]+\.pdf$/;
   const { filename } = req.params;
   if (!safeFile.test(filename)) return res.status(400).send("❌ اسم ملف غير صالح");
 
   const filePath = path.join(__dirname, "../public/pdfs", filename);
   if (!fs.existsSync(filePath)) return res.status(404).send("❌ الملف غير موجود");
 
-  // Force download (works for mobile & web)
-  res.download(filePath, filename, (err) => {
-    if (err) {
-      console.error("❌ Error downloading PDF:", err);
-      if (!res.headersSent) return res.status(500).send("❌ حدث خطأ أثناء تنزيل الملف");
-    } else {
-      console.log(`✅ PDF downloaded: ${filename}`);
-    }
+  const stat = fs.statSync(filePath);
+  res.writeHead(200, {
+    'Content-Type': 'application/pdf',
+    'Content-Length': stat.size,
+    'Content-Disposition': `inline; filename="${filename}"`
+  });
+
+  const readStream = fs.createReadStream(filePath);
+  readStream.pipe(res);
+
+  readStream.on('error', (err) => {
+    console.error("❌ Stream error:", err);
+    if (!res.headersSent) res.status(500).send("❌ حدث خطأ أثناء إرسال الملف");
   });
 });
 
-// ===================== EXCEL STUDENT REPORTS =====================
+// ===================== STUDENT REPORTS =====================
 const EXCEL_PATH = path.join(__dirname, "data", "students.xlsx");
 const subject_names = [
   "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
@@ -95,31 +99,22 @@ const subject_names = [
 ];
 
 function loadStudentsFromExcel() {
-  if (!fs.existsSync(EXCEL_PATH)) {
-    console.warn("⚠️ ملف Excel غير موجود:", EXCEL_PATH);
-    return {};
-  }
+  if (!fs.existsSync(EXCEL_PATH)) return {};
   const workbook = xlsx.readFile(EXCEL_PATH);
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet, { defval: "-" });
-
   const students = {};
   rows.forEach((row) => {
     const id = ["ID","Id","id","الهوية","رقم الهوية","NationalID"]
       .map(k => row[k]).find(v => v && String(v).trim() !== "");
     if (!id) return;
     const studentId = String(id).trim();
-
     const name = ["الاسم","اسم","Name","student_name"]
       .map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
-
     const className = ["الشعبة","Class","الفصل"]
       .map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
-
     const allCols = Object.keys(row);
     const dataCols = allCols.slice(4);
-
     const subjects = subject_names.map((sub, i) => {
       const base = i*6;
       return {
@@ -132,13 +127,11 @@ function loadStudentsFromExcel() {
         commitment: row[dataCols[base+5]] || "-"
       };
     });
-
     students[studentId] = {
       student: { "الاسم": String(name).trim(), "الشعبة": String(className).trim() },
       subjects
     };
   });
-
   return students;
 }
 
@@ -150,7 +143,6 @@ app.post("/api/reload-students", (req, res) => {
   return res.json({ ok: true, count: Object.keys(studentReports).length });
 });
 
-// ===================== SINGLE STUDENT REPORT =====================
 app.get("/api/report/:id", (req, res) => {
   const id = String(req.params.id).trim();
   const report = studentReports[id];
