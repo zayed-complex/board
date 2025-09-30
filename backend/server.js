@@ -121,10 +121,10 @@ function loadStudentsFromExcel() {
     if (!studentId || studentId === "-") return;
 
     const name = row[1] ? String(row[1]).trim() : "-";       // العمود الثاني: الاسم
-    const className = row[2] ? String(row[2]).trim() : "-";  // العمود الثالث: الشعبة
+    const className = row[2] ? String(row[3]).trim() : "-";  // العمود الرابع: الشعبة
 
     const subjects = subject_names.map((sub, i) => {
-      const base = 3 + i*5; // بعد الأعمدة الأساسية الثلاثة
+      const base = 4 + i*5; // بعد الأعمدة الأساسية الأربعة
       return {
         name: sub,
         formative: row[base] || "-",
