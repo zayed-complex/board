@@ -117,21 +117,24 @@ function loadStudentsFromExcel() {
   const dataRows = rows.slice(1); // تجاهل صف العناوين
 
   dataRows.forEach((row) => {
-    const studentId = String(row[0]).trim(); // العمود الأول: رقم الهوية
+    let studentId = row[0];
     if (!studentId || studentId === "-") return;
 
+    studentId = String(studentId).replace(/\s/g, "").trim(); // تنظيف رقم الهوية
+    if (!studentId) return;
+
     const name = row[1] ? String(row[1]).trim() : "-";       // العمود الثاني: الاسم
-    const className = row[2] ? String(row[3]).trim() : "-";  // العمود الرابع: الشعبة
+    const className = row[3] ? String(row[3]).trim() : "-";  // العمود الرابع: الشعبة ✅
 
     const subjects = subject_names.map((sub, i) => {
-      const base = 4 + i*5; // بعد الأعمدة الأساسية الأربعة
+      const base = 4 + i * 5; // من العمود الخامس تبدأ المواد
       return {
         name: sub,
         formative: row[base] || "-",
-        participation: row[base+1] || "-",
-        task: row[base+2] || "-",
-        commitment: row[base+3] || "-",
-        note: row[base+4] || ""
+        participation: row[base + 1] || "-",
+        task: row[base + 2] || "-",
+        commitment: row[base + 3] || "-",
+        note: row[base + 4] || ""
       };
     });
 
@@ -141,11 +144,11 @@ function loadStudentsFromExcel() {
     };
   });
 
+  console.log(`✅ Loaded ${Object.keys(students).length} student reports.`);
   return students;
 }
 
 let studentReports = loadStudentsFromExcel();
-console.log(`✅ Loaded ${Object.keys(studentReports).length} student reports.`);
 
 app.post("/api/reload-students", (req, res) => {
   studentReports = loadStudentsFromExcel();
@@ -154,9 +157,12 @@ app.post("/api/reload-students", (req, res) => {
 
 // ===================== SINGLE STUDENT REPORT =====================
 app.get("/api/report/:id", (req, res) => {
-  const id = String(req.params.id).trim();
+  const id = String(req.params.id).replace(/\s/g, "").trim();
   const report = studentReports[id];
-  if (!report) return res.status(404).send("❌ الطالب غير موجود");
+  if (!report) {
+    console.warn(`⚠️ رقم الهوية ${id} غير موجود`);
+    return res.status(404).send("❌ الطالب غير موجود");
+  }
   return res.json(report);
 });
 
