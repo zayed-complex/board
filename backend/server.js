@@ -66,7 +66,6 @@ app.get("/api/policies/:role", (req, res) => {
 });
 
 // ===================== PDF FILES =====================
-// للعرض داخل iframe
 app.get("/api/pdfs/:filename", (req, res) => {
   const safeFile = /^[\w.-]+\.pdf$/;
   const { filename } = req.params;
@@ -79,7 +78,6 @@ app.get("/api/pdfs/:filename", (req, res) => {
   res.sendFile(filePath);
 });
 
-// لتنزيل الملف مباشرة
 app.get("/api/pdfs/download/:filename", (req, res) => {
   const safeFile = /^[\w.-]+\.pdf$/;
   const { filename } = req.params;
@@ -109,41 +107,36 @@ function loadStudentsFromExcel() {
     console.warn("⚠️ ملف Excel غير موجود:", EXCEL_PATH);
     return {};
   }
+
   const workbook = xlsx.readFile(EXCEL_PATH);
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
-  const rows = xlsx.utils.sheet_to_json(sheet, { defval: "-" });
+  const rows = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: "-" });
 
   const students = {};
-  rows.forEach((row) => {
-    const id = ["ID","Id","id","الهوية","رقم الهوية","NationalID"]
-      .map(k => row[k]).find(v => v && String(v).trim() !== "");
-    if (!id) return;
-    const studentId = String(id).trim();
+  const dataRows = rows.slice(1); // تجاهل صف العناوين
 
-    const name = ["الاسم","اسم","Name","student_name"]
-      .map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
+  dataRows.forEach((row) => {
+    const studentId = String(row[0]).trim(); // العمود الأول: رقم الهوية
+    if (!studentId || studentId === "-") return;
 
-    const className = ["الشعبة","Class","الفصل"]
-      .map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
-
-    const allCols = Object.keys(row);
-    const dataCols = allCols.slice(4); // بعد الأعمدة الأساسية
+    const name = row[1] ? String(row[1]).trim() : "-";       // العمود الثاني: الاسم
+    const className = row[2] ? String(row[2]).trim() : "-";  // العمود الثالث: الشعبة
 
     const subjects = subject_names.map((sub, i) => {
-      const base = i*5; // الآن 5 أعمدة فقط لكل مادة
+      const base = 3 + i*5; // بعد الأعمدة الأساسية الثلاثة
       return {
         name: sub,
-        formative: row[dataCols[base]] || "-",
-        participation: row[dataCols[base+1]] || "-",
-        task: row[dataCols[base+2]] || "-",
-        commitment: row[dataCols[base+3]] || "-",
-        note: row[dataCols[base+4]] || "" // الملاحظة
+        formative: row[base] || "-",
+        participation: row[base+1] || "-",
+        task: row[base+2] || "-",
+        commitment: row[base+3] || "-",
+        note: row[base+4] || ""
       };
     });
 
     students[studentId] = {
-      student: { "الاسم": String(name).trim(), "الشعبة": String(className).trim() },
+      student: { "الاسم": name, "الشعبة": className },
       subjects
     };
   });
