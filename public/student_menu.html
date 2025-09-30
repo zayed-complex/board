@@ -43,11 +43,11 @@ const studentMenu = [
   { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
   { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
-  { title: "التقارير الطلابية", type: "page", path: "/report.html" },
+  { title: "تقرير طالب", type: "page", path: "/report.html" },
   { title: "السياسات", type: "submenu", role: "student" },
   { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
   { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
-  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.ese.gov.ae/" }
+  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
 ];
 
 const container = document.getElementById("menuContainer");
@@ -82,6 +82,9 @@ studentMenu.forEach(item => {
       case "external":
         window.open(item.url, "_blank");
         break;
+      case "page":
+         window.location.href = item.path;
+         break;
     }
   };
 
