@@ -77,12 +77,17 @@
     tr:nth-child(even) {
       background-color: #f9f9f9;
     }
-    .back-btn {
+    .notes-box {
       margin-top: 20px;
-      background-color: #6c757d;
+      padding: 15px;
+      background: #fdf6e3;
+      border: 1px solid #eed;
+      border-radius: 8px;
+      display: none;
     }
-    .back-btn:hover {
-      background-color: #495057;
+    .notes-box h3 {
+      margin-top: 0;
+      color: #b58900;
     }
   </style>
 </head>
@@ -100,17 +105,19 @@
       <thead>
         <tr>
           <th>المادة</th>
-          <th>الاختبار التكويني</th>
-          <th>المستوى الأكاديمي</th>
-          <th>المشاركة</th>
-          <th>إنجاز المهام</th>
-          <th>السلوك</th>
-          <th>الالتزام والحضور</th>
+          <th>الاختبارات التكوينية</th>
+          <th>المشاركة الصفية</th>
+          <th>انجاز المهام / مهمة الأداء</th>
+          <th>الحضور والالتزام</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
 
+    <div id="notesBox" class="notes-box">
+      <h3>📝 الملاحظات:</h3>
+      <ul id="notesList" style="text-align:right; line-height:1.8;"></ul>
+    </div>
   </div>
 
   <script>
@@ -123,7 +130,7 @@
 
       const res = await fetch("/api/report/" + id);
       if (!res.ok) {
-        alert("الطالب غير موجود");
+        alert("❌ الطالب غير موجود");
         return;
       }
 
@@ -132,31 +139,44 @@
       // عرض بيانات الطالب
       const infoDiv = document.getElementById("studentInfo");
       infoDiv.style.display = "block";
-          infoDiv.innerHTML = `
-           <div style="display:flex; gap:40px;">
-            <p><b>الاسم:</b> ${data.student["الاسم"] || "-"}</p>
-            <p><b>الشعبة:</b> ${data.student["الشعبة"] || "-"}</p>
-           </div>
-           `;
+      infoDiv.innerHTML = `
+        <div style="display:flex; gap:40px;">
+          <p><b>الاسم:</b> ${data.student["الاسم"] || "-"}</p>
+          <p><b>الشعبة:</b> ${data.student["الشعبة"] || "-"}</p>
+        </div>
+      `;
 
       // عرض المواد
       const tbody = document.querySelector("#subjectsTable tbody");
       tbody.innerHTML = "";
+      let notes = [];
+
       data.subjects.forEach(sub => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${sub.name}</td>
           <td>${sub.formative || "-"}</td>
-          <td>${sub.academic || "-"}</td>
           <td>${sub.participation || "-"}</td>
-          <td>${sub.alef || "-"}</td>
-          <td>${sub.behavior || "-"}</td>
+          <td>${sub.task || "-"}</td>
           <td>${sub.commitment || "-"}</td>
         `;
         tbody.appendChild(tr);
+
+        if (sub.note && sub.note.trim() !== "" && sub.note !== "-") {
+          notes.push(`${sub.name}: ${sub.note}`);
+        }
       });
 
       document.getElementById("subjectsTable").style.display = "table";
+
+      // عرض الملاحظات
+      if (notes.length > 0) {
+        const notesList = document.getElementById("notesList");
+        notesList.innerHTML = notes.map(n => `<li>${n}</li>`).join("");
+        document.getElementById("notesBox").style.display = "block";
+      } else {
+        document.getElementById("notesBox").style.display = "none";
+      }
     }
   </script>
 </body>

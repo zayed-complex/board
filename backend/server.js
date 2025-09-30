@@ -128,18 +128,17 @@ function loadStudentsFromExcel() {
       .map(k => row[k]).find(v => v && String(v).trim() !== "") || "-";
 
     const allCols = Object.keys(row);
-    const dataCols = allCols.slice(4);
+    const dataCols = allCols.slice(4); // بعد الأعمدة الأساسية
 
     const subjects = subject_names.map((sub, i) => {
-      const base = i*6;
+      const base = i*5; // الآن 5 أعمدة فقط لكل مادة
       return {
         name: sub,
         formative: row[dataCols[base]] || "-",
-        academic: row[dataCols[base+1]] || "-",
-        participation: row[dataCols[base+2]] || "-",
-        alef: row[dataCols[base+3]] || "-",
-        behavior: row[dataCols[base+4]] || "-",
-        commitment: row[dataCols[base+5]] || "-"
+        participation: row[dataCols[base+1]] || "-",
+        task: row[dataCols[base+2]] || "-",
+        commitment: row[dataCols[base+3]] || "-",
+        note: row[dataCols[base+4]] || "" // الملاحظة
       };
     });
 
