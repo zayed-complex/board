@@ -93,24 +93,5 @@ staffMenu.forEach(item => {
   container.appendChild(btn);
 });
 </script>
-<button id="downloadPdfBtn" style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:10px 14px;">
-  تنزيل الـ PDF
-</button>
-
-<script>
-(function(){
-  // عدّل هذا الرابط لمسار ملف الـ PDF المعروض في صفحتك
-  var pdfUrl = "/api/pdfs/download/${item.filename}"; 
-
-  document.getElementById('downloadPdfBtn').addEventListener('click', function(){
-    var a = document.createElement('a');
-    a.href = pdfUrl;
-    a.download = pdfUrl.split('/').pop(); // يضع اسم الملف حسب الرابط
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
-})();
-</script>
 </body>
 </html>
