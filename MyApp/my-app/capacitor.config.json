@@ -1,0 +1,10 @@
+{
+  "appId": "com.zayed_complex.app",
+  "appName": "Zayed Complex DashBoard",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}

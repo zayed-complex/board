@@ -54,8 +54,8 @@ const studentMenu = [
   { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "التقارير الطلابية", type: "page", path: "/report.html" },
-  { title: "التقارير ", type: "page", path: "/test.html" },
   { title: "السياسات", type: "submenu", role: "student" },
   { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
   { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
@@ -70,43 +70,8 @@ studentMenu.forEach(item => {
   btn.className = "menu-btn";
   btn.textContent = item.title;
 
-  btn.onclick = () => {
-    switch(item.type) {
-      case "pdf":
-        // ✅ تحميل PDF عبر pdf.js داخل iframe نفسه
-        pdfViewer.src = `/pdfjs/web/viewer.html?file=/pdfs/${item.filename}`;
-        pdfViewer.style.display = "block";
-        pdfViewer.scrollIntoView({behavior: "smooth"});
-        break;
-      case "page":
-        window.location.href = item.path;
-        break;
-      case "submenu":
-        window.location.href = `/policies.html?role=${item.role}`;
-        break;
-      case "external":
-        window.open(item.url, "_blank");
-        break;
-    }
-  };
-
   container.appendChild(btn);
 });
-</script>
-<script>
-(function(){
-  // عدّل هذا الرابط لمسار ملف الـ PDF المعروض في صفحتك
-  var pdfUrl = "/api/pdfs/download/${item.filename}"; 
-
-  document.getElementById('downloadPdfBtn').addEventListener('click', function(){
-    var a = document.createElement('a');
-    a.href = pdfUrl;
-    a.download = pdfUrl.split('/').pop(); // يضع اسم الملف حسب الرابط
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
-})();
 </script>
 </body>
 </html>
