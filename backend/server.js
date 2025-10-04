@@ -54,7 +54,7 @@ const staffPolicies = [
   { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
   { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
   { title: "سياسة الحضور والانصراف", filename: "attendance_policy.pdf" },
-  { title: "سياسة التعاقد الوظيفي", filename: "employment_contract_policy.pdf" },
+  { title: "إطار معايير الرقابة والتقييم المدرسية", filename: "framework.pdf" },
   { title: "السياسات المهنية والأخلاقية", filename: "ethics_charter_policy.pdf" }
 ];
 
