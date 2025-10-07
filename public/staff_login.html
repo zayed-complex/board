@@ -112,6 +112,7 @@
       if (res.success) {
         // ✅ تعيين الدور staff في التخزين المحلي
         localStorage.setItem("role", "staff");
+            sessionStorage.setItem("role", "staff");
         localStorage.setItem("username", username);
 
         // الانتقال إلى لوحة التحكم

@@ -52,13 +52,16 @@ const closeBtn = document.getElementById("closeBtn");
 const pageTitle = document.getElementById("pageTitle");
 const errorMessage = document.getElementById("errorMessage");
 
+// استرجاع الدور أولاً من URL أو sessionStorage أو localStorage
 const params = new URLSearchParams(window.location.search);
-const role = params.get("role") || sessionStorage.getItem("role") || "student";
+const role = params.get("role") || sessionStorage.getItem("role") || localStorage.getItem("role") || "student";
 
+// تغيير العنوان تلقائياً حسب الدور
 pageTitle.textContent = role === "staff"
-  ? "📄 سياسات الكادر الإداري والتدريسي"
+  ? "📄 سياسات المعلم / الإداري"
   : "📄 سياسات الطالب / ولي الأمر";
 
+// تحميل السياسات حسب الدور
 fetch(`/api/policies/${role}`)
   .then(res => {
     if (!res.ok) throw new Error(`خطأ في استجابة السيرفر (${res.status})`);

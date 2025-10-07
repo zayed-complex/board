@@ -51,7 +51,11 @@ const closeBtn = document.getElementById("closeBtn");
 const pageTitle = document.getElementById("pageTitle");
 
 const params = new URLSearchParams(window.location.search);
-const role = params.get("role") || sessionStorage.getItem("role") || "student";
+const role =
+  params.get("role") ||
+  sessionStorage.getItem("role") ||
+  localStorage.getItem("role") ||
+  "student";
 
 pageTitle.textContent = role === "staff"
   ? "🎓 لوحة تحكم المعلم / الإداري"
