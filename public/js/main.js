@@ -68,7 +68,7 @@ function selectRole(role) {
 
   const rolePages = {
     staff: "staff_login.html",
-    student: "student_menu.html"
+    student: "dashboard.html"
   };
 
   const page = rolePages[role];

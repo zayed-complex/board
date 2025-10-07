@@ -100,7 +100,7 @@
     </form>
   </div>
 
-  <script src="/js/client.js"></script>
+  <script src="/js/main.js"></script>
   <script>
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -108,7 +108,7 @@
       const password = document.getElementById("password").value.trim();
       const res = await apiPost("/api/login", { username, password });
       if (res.success) {
-        location.href = "/staff_menu.html";
+        location.href = "/dashboard.html";
       } else {
         showError(res.message || "خطأ غير معروف");
       }
