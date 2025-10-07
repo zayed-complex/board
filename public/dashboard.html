@@ -54,7 +54,7 @@ const params = new URLSearchParams(window.location.search);
 const role = params.get("role") || sessionStorage.getItem("role") || "student";
 
 pageTitle.textContent = role === "staff"
-  ? "🎓 لوحة تحكم الكادر الإداري والتدريسي"
+  ? "🎓 لوحة تحكم المعلم / الإداري"
   : "🎓 لوحة تحكم الطالب / ولي الأمر";
 
 fetch(`/api/menu/${role}`)
