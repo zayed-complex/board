@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>تسجيل دخول الموظف</title>
+  <title>تسجيل دخول معلم / إداري</title>
   <link rel="stylesheet" href="/style.css" />
   <style>
     body {
@@ -84,7 +84,7 @@
 
   <div class="login-container">
     <div class="login-header">
-      <h2>تسجيل دخول الموظف</h2>
+      <h2>تسجيل دخول معلم / إداري</h2>
     </div>
 
     <div id="error" class="error" style="display:none"></div>
@@ -100,17 +100,24 @@
     </form>
   </div>
 
-  <script src="/js/main.js"></script>
   <script>
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
+
+      // إرسال الطلب للتحقق من بيانات الدخول
       const res = await apiPost("/api/login", { username, password });
+
       if (res.success) {
+        // ✅ تعيين الدور staff في التخزين المحلي
+        localStorage.setItem("role", "staff");
+        localStorage.setItem("username", username);
+
+        // الانتقال إلى لوحة التحكم
         location.href = "/dashboard.html";
       } else {
-        showError(res.message || "خطأ غير معروف");
+        showError(res.message || "اسم المستخدم أو كلمة المرور غير صحيحة");
       }
     });
 
@@ -119,6 +126,7 @@
       errorDiv.innerText = msg;
       errorDiv.style.display = "block";
     }
+
     async function apiPost(url, data) {
       const res = await fetch(url, {
         method: "POST",
