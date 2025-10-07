@@ -3,10 +3,14 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const xlsx = require("xlsx");
+const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "../public"), { etag: false, maxAge: 0 }));
@@ -19,15 +23,32 @@ const STAFF_USERS = [
 
 // ===================== MENUS =====================
 const studentMenu = [
-  { title: "الإعلانات", page: "announcements.html" },
-  { title: "الأنشطة الطلابية", page: "activities.html" },
-  { title: "السياسات", page: "policies.html?role=student" }
+  { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
+  { title: "تقرير طالب", type: "page", path: "/report.html" },
+  { title: "السياسات", type: "submenu", role: "student" },
+  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
+  { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
+  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
 ];
 
 const staffMenu = [
-  { title: "الإعلانات", page: "announcements.html" },
-  { title: "الأنشطة", page: "activities.html" },
-  { title: "السياسات", page: "policies.html?role=staff" }
+  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
+  { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
+  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
+  { title: "السياسات", type: "submenu", role: "staff" },
+  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn"},
+  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
+  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
+  { title: "رحلتي", type: "external", url: "https://idh.moe.gov.ae/" },
+  { title: "المنهل", type: "external", url: "https://sis.moe.gov.ae/" },
+{ title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
+  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
 ];
 
 app.get("/api/menu/:role", (req, res) => {
