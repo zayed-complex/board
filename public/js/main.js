@@ -3,6 +3,13 @@
 // ================================
 async function loadMenu(role) {
   const container = document.getElementById("menuContainer");
+
+  // ✅ تأكد من وجود العنصر
+  if (!container) {
+    console.warn("⚠️ العنصر #menuContainer غير موجود في هذه الصفحة، سيتم تجاهل تحميل القائمة.");
+    return;
+  }
+
   container.innerHTML = "";
 
   if (!role) {
@@ -47,7 +54,7 @@ async function loadMenu(role) {
     });
 
   } catch (err) {
-    console.error("⚠ خطأ:", err);
+    console.error("⚠️ خطأ:", err);
     container.innerHTML = "<p>تعذر تحميل القائمة، يرجى المحاولة لاحقًا</p>";
   }
 }
