@@ -5,18 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>بوابة مجمّع زايد التعليمي</title>
 <style>
-body { font-family: Arial; text-align: center; padding: 50px; direction: rtl; }
-h1 { font-size: 2em; margin-bottom: 30px; }
-.btn { background: #3498db; color: white; border: none; padding: 15px 25px; margin: 10px; border-radius: 8px; font-size: 1.1em; cursor: pointer; }
-.btn:hover { background: #217dbb; }
+  body { font-family: Arial; text-align: center; padding: 50px; direction: rtl; }
+  h1 { font-size: 2em; margin-bottom: 30px; }
+  .btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    margin: 10px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+  }
+  .btn:hover { background: #217dbb; }
 </style>
 </head>
 <body>
-<h1>مرحباً بكم في مجمّع زايد التعليمي</h1>
+  <h1>مرحباً بكم في مجمّع زايد التعليمي</h1>
 
-<button class="btn" id="studentBtn">دخول طالب / ولي أمر</button>
-<button class="btn" id="staffBtn">دخول معلم / إداري</button>
+  <button class="btn" id="studentBtn">دخول طالب / ولي أمر</button>
+  <button class="btn" id="staffBtn">دخول معلم / إداري</button>
 
-<script src="js/main.js" defer></script>
+  <script>
+    // ✅ This simple script replaces main.js for this page
+    document.getElementById("studentBtn").addEventListener("click", () => {
+      window.location.href = "student_dashboard.html"; // ← your student page
+    });
+
+    document.getElementById("staffBtn").addEventListener("click", () => {
+      window.location.href = "staff_login.html"; // ← your staff page
+    });
+  </script>
 </body>
 </html>
