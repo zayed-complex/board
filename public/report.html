@@ -16,6 +16,29 @@
       color: #fff;
       padding: 15px;
       font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .header-top img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 4px;
+    }
+    .school-name {
+      font-size: 18px;
+      color: #ecf0f1;
+      margin: 0;
     }
     .container {
       margin: 30px auto;
@@ -93,8 +116,20 @@
     }
   </style>
 </head>
+<!-- ==================== أزرار الرجوع والإنهاء ==================== -->
+<div id="navControls">
+  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
+  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
+</div>
 <body>
-  <header>📑 تقرير الطالب</header>
+  <header>
+    <div class="header-top">
+      <img src="./icons/logo.png" alt="شعار المدرسة">
+      <span>📑 تقرير الطالب</span>
+    </div>
+    <p class="school-name">مجمع زايد التعليمي - الظيت</p>
+  </header>
+
   <div class="container">
     <div class="search-box">
       <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
@@ -171,7 +206,7 @@
 
         html += "</tbody></table>";
 
-        // عرض الملاحظات تحت الجدول
+        // عرض الملاحظات
         if (notes.length > 0) {
           html += `
             <div class="notes-box">
@@ -191,6 +226,26 @@
         errorDiv.textContent = "❌ حدث خطأ غير متوقع.";
       }
     }
+// ==================== أزرار الرجوع / الإنهاء ====================
+document.getElementById("backBtn").onclick = () => {
+  window.location.href = "/index.html";
+};
+
+document.getElementById("exitBtn").onclick = () => {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    window.close();
+  } else {
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
+        <h2>👋 تم إنهاء الجلسة</h2>
+        <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
+        <button onclick="window.location.href='/index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
+          🔁 عودة للرئيسية
+        </button>
+      </div>
+    `;
+  }
+};
   </script>
 </body>
 </html>
