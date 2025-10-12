@@ -1,40 +1,94 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بوابة مجمّع زايد التعليمي</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تسجيل الدخول - مجمّع زايد التعليمي- الظيت</title>
 <style>
-  body { font-family: Arial; text-align: center; padding: 50px; direction: rtl; }
-  h1 { font-size: 2em; margin-bottom: 30px; }
-  .btn {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 15px 25px;
-    margin: 10px;
-    border-radius: 8px;
-    font-size: 1.1em;
-    cursor: pointer;
-  }
-  .btn:hover { background: #217dbb; }
+body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 50px; background: #f4f6f8; }
+h1 { margin-bottom: 30px; color: #333; }
+select, input, button { font-size: 16px; margin: 5px; }
+button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; background: #3498db; color: #fff; transition: 0.2s; }
+button:hover { background: #217dbb; transform: translateY(-2px); }
+.hidden { display: none; }
+footer { text-align: center; padding: 15px; font-size: 0.9em; color: #777; margin-top: 50px; }
 </style>
 </head>
 <body>
-  <h1>مرحباً بكم في مجمّع زايد التعليمي</h1>
 
-  <button class="btn" id="studentBtn">دخول طالب / ولي أمر</button>
-  <button class="btn" id="staffBtn">دخول معلم / إداري</button>
+<h1>🔐 نظام الدخول الموحّد</h1>
+<h2>مرحباً بك في مجمّع زايد التعليمي- الظيت</h2>
 
-  <script>
-    // ✅ This simple script replaces main.js for this page
-    document.getElementById("studentBtn").addEventListener("click", () => {
-      window.location.href = "dashboard.html"; // ← your student page
-    });
+<!-- إعدادات PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2c3e50">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
 
-    document.getElementById("staffBtn").addEventListener("click", () => {
-      window.location.href = "staff_login.html"; // ← your staff page
-    });
-  </script>
+<label for="role">خيارات الدخول</label>
+<select id="role" onchange="handleRoleChange()">
+  <option value="">-- اختر الدور --</option>
+  <option value="student">👨‍🎓 طالب / ولي الأمر</option>
+  <option value="staff">🧑‍🏫 معلم / إداري</option>
+</select>
+
+<div id="staffFields" class="hidden">
+  <label for="username">اسم المستخدم</label>
+  <input type="text" id="username" placeholder="أدخل اسم المستخدم" />
+
+  <label for="password">كلمة المرور</label>
+  <input type="password" id="password" placeholder="أدخل كلمة المرور" />
+
+  <button onclick="login()">تسجيل الدخول</button>
+  <p id="loginMessage" style="color:red; margin-top:10px;"></p>
+</div>
+
+<footer>
+  <p>© جميع الحقوق محفوظة - مجمّع زايد التعليمي- الظيت</p>
+</footer>
+
+<script>
+function handleRoleChange() {
+  const role = document.getElementById("role").value;
+  const staffFields = document.getElementById("staffFields");
+  const msg = document.getElementById("loginMessage");
+  msg.textContent = "";
+
+  if (role === "student") {
+    sessionStorage.setItem("role", "student");
+    window.location.href = "dashboard.html?role=student";
+  } else if (role === "staff") {
+    staffFields.classList.remove("hidden");
+  } else {
+    staffFields.classList.add("hidden");
+  }
+}
+
+function login() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("loginMessage");
+  msg.textContent = "";
+
+  if (!username || !password) {
+    msg.textContent = "❌ يرجى إدخال اسم المستخدم وكلمة المرور";
+    return;
+  }
+
+  // تحقق تجريبي
+  if (username === "admin" && password === "1234") {
+    sessionStorage.setItem("role", "staff");
+    window.location.href = "dashboard.html?role=staff";
+  } else {
+    msg.textContent = "❌ بيانات الدخول غير صحيحة";
+  }
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('✅ Service Worker Recorded'))
+       .catch(err => console.error('❌ خطأ في تسجيل Service Worker:', err));
+}
+</script>
 </body>
 </html>

@@ -18,13 +18,14 @@ app.use(express.static(path.join(__dirname, "../public"), { etag: false, maxAge:
 // ===================== STAFF USERS =====================
 const STAFF_USERS = [
   { username: "admin", password: "1234" },
+  { username: "Admin", password: "1234" },
   { username: "staff", password: "abcd" }
 ];
 
 // ===================== MENUS =====================
 const studentMenu = [
-  { title: "عرض جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "عرض جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
   { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "تقرير طالب", type: "page", path: "/report.html" },
@@ -47,7 +48,7 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
   { title: "رحلتي", type: "external", url: "https://idh.moe.gov.ae/" },
   { title: "المنهل", type: "external", url: "https://sis.moe.gov.ae/" },
-{ title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
+  { title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
   { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
 ];
 

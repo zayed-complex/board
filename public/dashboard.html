@@ -5,43 +5,115 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎓 لوحة التحكم</title>
 <style>
-body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 20px; background: #f4f6f8; }
-h1 { margin-bottom: 20px; color: #333; }
-#menuContainer { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-.menu-btn { padding: 12px 20px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; background: #3498db; color: #fff; transition: 0.2s; min-width: 220px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-.menu-btn:hover { background: #217dbb; transform: translateY(-2px); }
+/* ==================== أساسي ==================== */
+body {
+  font-family: "Tahoma", Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #f4f6f8;
+}
+h1 {
+  margin-bottom: 20px;
+  color: #333;
+}
 
-#pdfContainer { display: none; width: 90%; margin: 20px auto; position: relative; }
-#pdfViewer { width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 8px; }
-#pdfControls { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; position: static; z-index: 10; }
-.pdf-btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; color: white; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-#downloadBtn { background-color: #3498db; } #downloadBtn:hover { background-color: #217dbb; }
-#printBtn { background-color: #f39c12; } #printBtn:hover { background-color: #d68910; }
-#closeBtn { background-color: #e74c3c; } #closeBtn:hover { background-color: #c0392b; }
+/* ==================== أزرار موحدة ==================== */
+.button {
+  padding: 10px 18px;
+  font-size: 1em;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 5px;
+}
 
+.btn-primary { background-color: #3498db; }
+.btn-primary:hover { background-color: #217dbb; }
+
+.btn-danger { background-color: #e74c3c; }
+.btn-danger:hover { background-color: #c0392b; }
+
+.btn-warning { background-color: #f39c12; }
+.btn-warning:hover { background-color: #d68910; }
+
+.btn-info { background-color: #16a085; }
+.btn-info:hover { background-color: #13876b; }
+
+/* ==================== حاويات الأزرار ==================== */
+#navControls, #pdfControls, #menuContainer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+#navControls {
+  background: #fff;
+  padding: 15px 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+/* ==================== عرض ملفات PDF ==================== */
+#pdfContainer {
+  display: none;
+  width: 90%;
+  margin: 20px auto;
+  position: relative;
+}
+
+#pdfViewer {
+  width: 100%;
+  height: 600px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* ==================== استجابة للشاشات الصغيرة ==================== */
 @media (max-width: 768px) {
   #pdfViewer { height: 80vh; }
-  #pdfControls { flex-direction: row; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-  .pdf-btn { flex: 1 1 45%; min-width: 100px; justify-content: center; }
-  .menu-btn { width: 90%; font-size: 1em; padding: 10px; }
+  #pdfControls, #menuContainer, #navControls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .button { width: 90%; padding: 10px; font-size: 1em; }
 }
 </style>
 </head>
 <body>
 
 <h1 id="pageTitle">🎓 لوحة التحكم</h1>
+
+<!-- ==================== قائمة الأزرار ==================== -->
 <div id="menuContainer"></div>
 
+<!-- ==================== أزرار الرجوع والإنهاء ==================== -->
+<div id="navControls">
+  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
+  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
+</div>
+
+<!-- ==================== عرض PDF ==================== -->
 <div id="pdfContainer">
   <div id="pdfControls">
-    <button class="pdf-btn" id="downloadBtn">⬇ تحميل PDF</button>
-    <button class="pdf-btn" id="printBtn">🖨️ طباعة PDF</button>
-    <button class="pdf-btn" id="closeBtn">❌ إغلاق الملف</button>
+    <button class="button btn-primary" id="downloadBtn">⬇ تحميل PDF</button>
+    <button class="button btn-warning" id="printBtn">🖨️ طباعة PDF</button>
+    <button class="button btn-danger" id="closeBtn">❌ إغلاق الملف</button>
   </div>
   <iframe id="pdfViewer"></iframe>
 </div>
 
 <script>
+// ==================== المتغيرات ====================
 const menuContainer = document.getElementById("menuContainer");
 const pdfContainer = document.getElementById("pdfContainer");
 const pdfViewer = document.getElementById("pdfViewer");
@@ -50,59 +122,69 @@ const printBtn = document.getElementById("printBtn");
 const closeBtn = document.getElementById("closeBtn");
 const pageTitle = document.getElementById("pageTitle");
 
+// تحديد الدور
 const params = new URLSearchParams(window.location.search);
-const role =
-  params.get("role") ||
-  sessionStorage.getItem("role") ||
-  localStorage.getItem("role") ||
-  "student";
+const role = params.get("role") || sessionStorage.getItem("role") || "student";
 
+// تغيير العنوان حسب الدور
 pageTitle.textContent = role === "staff"
-  ? "🎓 لوحة تحكم المعلم / الإداري"
+  ? "🎓 لوحة تحكم الكادر الإداري والتدريسي"
   : "🎓 لوحة تحكم الطالب / ولي الأمر";
 
+// ==================== تحميل القائمة ====================
 fetch(`/api/menu/${role}`)
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error(`خطأ ${res.status}`);
+    return res.json();
+  })
   .then(menuItems => renderMenu(menuItems))
   .catch(err => {
     console.error("خطأ في تحميل القائمة:", err);
     menuContainer.innerHTML = "<p style='color:red;'>❌ تعذر تحميل القائمة.</p>";
   });
 
+// ==================== عرض القائمة ====================
 function renderMenu(menu) {
   menuContainer.innerHTML = "";
   menu.forEach(item => {
     const btn = document.createElement("button");
-    btn.className = "menu-btn";
+    btn.className = "button btn-primary";
     btn.textContent = item.title;
     btn.onclick = () => handleMenuClick(item);
     menuContainer.appendChild(btn);
   });
 }
 
+// ==================== التعامل مع نقر الأزرار ====================
 function handleMenuClick(item) {
   pdfContainer.style.display = "none";
+
   switch (item.type) {
-    case "pdf": openPdf(item.filename); break;
-    case "submenu":
-      if(item.title === "السياسات") {
-        window.location.href = `/policies.html?role=${role}`;
-      } else {
-        window.location.href = `/policies.html?role=${item.role}`;
-      }
+    case "pdf":
+      openPdf(item.filename);
       break;
-    case "page": window.location.href = item.path; break;
-    case "external": window.open(item.url, "_blank", "noopener,noreferrer"); break;
+    case "submenu":
+      window.location.href = `/policies.html?role=${item.role || role}`;
+      break;
+    case "page":
+      window.location.href = `.${item.path}`;
+      break;
+    case "external":
+      window.open(item.url, "_blank", "noopener,noreferrer");
+      break;
   }
 }
 
+// ==================== فتح ملفات PDF ====================
 function openPdf(filename) {
-  const viewUrl = `/pdfs/${filename}`;
-  const downloadUrl = `/pdfs/${filename}`;
-  pdfViewer.src = `/pdfjs/web/viewer.html?file=${encodeURIComponent(viewUrl)}`;
+  const viewUrl = `./pdfs/${filename}`;
+  const downloadUrl = `./pdfs/${filename}`;
+  pdfViewer.src = `/pdfjs/web/viewer.html?file=${encodeURIComponent('/pdfs/' + filename)}`;
   pdfContainer.style.display = "block";
   pdfContainer.scrollIntoView({ behavior: "smooth" });
+
   downloadBtn.onclick = () => window.open(downloadUrl, "_blank");
+
   printBtn.onclick = () => {
     const printFrame = document.createElement('iframe');
     printFrame.style.display = 'none';
@@ -111,8 +193,31 @@ function openPdf(filename) {
     printFrame.contentWindow.focus();
     printFrame.contentWindow.print();
   };
-  closeBtn.onclick = () => { pdfContainer.style.display = "none"; pdfViewer.src = ""; };
+
+  closeBtn.onclick = () => {
+    pdfContainer.style.display = "none";
+    pdfViewer.src = "";
+  };
 }
+
+// ==================== أزرار الرجوع / الإنهاء ====================
+document.getElementById("backBtn").onclick = () => window.location.href = "./index.html";
+
+document.getElementById("exitBtn").onclick = () => {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    window.close();
+  } else {
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
+        <h2>👋 تم إنهاء الجلسة</h2>
+        <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
+        <button onclick="window.location.href='./index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
+          🔁 عودة للرئيسية
+        </button>
+      </div>
+    `;
+  }
+};
 </script>
 
 </body>

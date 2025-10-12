@@ -5,44 +5,129 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>📄 السياسات</title>
 <style>
-body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 20px; background: #f4f6f8; }
-h1 { margin-bottom: 20px; color: #333; }
-#policyMenu { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 20px; }
-.policy-btn { padding: 12px 20px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; background: #3498db; color: #fff; transition: 0.2s; min-width: 220px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-.policy-btn:hover { background: #217dbb; transform: translateY(-2px); }
+/* ==================== أساسي ==================== */
+body {
+  font-family: "Tahoma", Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #f4f6f8;
+}
+h1 {
+  margin-bottom: 20px;
+  color: #333;
+}
 
-#policyContainer { display: none; width: 90%; margin: 20px auto; position: relative; }
-#policyViewer { width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 8px; }
-#policyControls { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; position: static; z-index: 10; }
-.pdf-btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; color: white; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-#downloadBtn { background-color: #3498db; } #downloadBtn:hover { background-color: #217dbb; }
-#printBtn { background-color: #f39c12; } #printBtn:hover { background-color: #d68910; }
-#closeBtn { background-color: #e74c3c; } #closeBtn:hover { background-color: #c0392b; }
-#errorMessage { color: red; margin-top: 15px; }
+/* ==================== أزرار موحدة ==================== */
+.button {
+  padding: 10px 18px;
+  font-size: 1em;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 5px;
+}
+
+.btn-primary { background-color: #3498db; }
+.btn-primary:hover { background-color: #217dbb; }
+
+.btn-danger { background-color: #e74c3c; }
+.btn-danger:hover { background-color: #c0392b; }
+
+.btn-warning { background-color: #f39c12; }
+.btn-warning:hover { background-color: #d68910; }
+
+.btn-info { background-color: #16a085; }
+.btn-info:hover { background-color: #13876b; }
+
+/* ==================== حاويات الأزرار ==================== */
+#navControls, #pdfControls, #searchButtons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+#navControls {
+  background: #fff;
+  padding: 15px 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+/* ==================== عرض PDF / Policy ==================== */
+#policyContainer {
+  display: none;
+  width: 90%;
+  margin: 20px auto;
+  position: relative;
+}
+
+#policyViewer {
+  width: 100%;
+  height: 600px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+#errorMessage {
+  color: red;
+  margin-top: 15px;
+}
+
+/* ==================== استجابة الشاشات الصغيرة ==================== */
 @media (max-width: 768px) {
-  #policyViewer { height: 80vh; }
-  #policyControls { flex-direction: row; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-  .pdf-btn { flex: 1 1 45%; min-width: 100px; justify-content: center; }
-  .policy-btn { width: 90%; font-size: 1em; padding: 10px; }
+  #policyViewer {
+    height: 80vh;
+  }
+
+  #pdfControls, #menuContainer, #policyMenu, #navControls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .button {
+    width: 90%;
+    padding: 10px;
+    font-size: 1em;
+  }
 }
 </style>
 </head>
 <body>
 
+<!-- ==================== أزرار الرجوع والإنهاء ==================== -->
+<div id="navControls">
+  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
+  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
+</div>
+
 <h1 id="pageTitle">📄 السياسات</h1>
+
+<!-- ==================== قائمة السياسات ==================== -->
 <div id="policyMenu"></div>
 <div id="errorMessage"></div>
 
+<!-- ==================== عرض ملف PDF ==================== -->
 <div id="policyContainer">
-  <div id="policyControls">
-    <button class="pdf-btn" id="downloadBtn">⬇ تحميل PDF</button>
-    <button class="pdf-btn" id="printBtn">🖨️ طباعة PDF</button>
-    <button class="pdf-btn" id="closeBtn">❌ إغلاق الملف</button>
+  <div id="pdfControls">
+    <button class="button btn-primary" id="downloadBtn">⬇ تحميل PDF</button>
+    <button class="button btn-warning" id="printBtn">🖨️ طباعة PDF</button>
+    <button class="button btn-danger" id="closeBtn">❌ إغلاق الملف</button>
   </div>
   <iframe id="policyViewer"></iframe>
 </div>
 
 <script>
+// ==================== تحميل السياسات ====================
 const policyMenu = document.getElementById("policyMenu");
 const policyContainer = document.getElementById("policyContainer");
 const policyViewer = document.getElementById("policyViewer");
@@ -52,16 +137,13 @@ const closeBtn = document.getElementById("closeBtn");
 const pageTitle = document.getElementById("pageTitle");
 const errorMessage = document.getElementById("errorMessage");
 
-// استرجاع الدور أولاً من URL أو sessionStorage أو localStorage
 const params = new URLSearchParams(window.location.search);
-const role = params.get("role") || sessionStorage.getItem("role") || localStorage.getItem("role") || "student";
+const role = params.get("role") || sessionStorage.getItem("role") || "student";
 
-// تغيير العنوان تلقائياً حسب الدور
 pageTitle.textContent = role === "staff"
-  ? "📄 سياسات المعلم / الإداري"
+  ? "📄 سياسات الكادر الإداري والتدريسي"
   : "📄 سياسات الطالب / ولي الأمر";
 
-// تحميل السياسات حسب الدور
 fetch(`/api/policies/${role}`)
   .then(res => {
     if (!res.ok) throw new Error(`خطأ في استجابة السيرفر (${res.status})`);
@@ -84,7 +166,7 @@ function renderPolicyMenu(policies) {
   errorMessage.textContent = "";
   policies.forEach(item => {
     const btn = document.createElement("button");
-    btn.className = "policy-btn";
+    btn.className = "button btn-primary";
     btn.textContent = item.title;
     btn.onclick = () => openPolicy(item.filename);
     policyMenu.appendChild(btn);
@@ -113,6 +195,27 @@ function openPolicy(filename) {
     policyViewer.src = "";
   };
 }
+
+// ==================== أزرار الرجوع / الإنهاء ====================
+document.getElementById("backBtn").onclick = () => {
+  window.location.href = "/index.html";
+};
+
+document.getElementById("exitBtn").onclick = () => {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    window.close();
+  } else {
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
+        <h2>👋 تم إنهاء الجلسة</h2>
+        <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
+        <button onclick="window.location.href='/index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
+          🔁 عودة للرئيسية
+        </button>
+      </div>
+    `;
+  }
+};
 </script>
 
 </body>
