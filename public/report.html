@@ -124,10 +124,8 @@
 <body>
   <header>
     <div class="header-top">
-      <img src="./icons/logo.png" alt="شعار المدرسة">
       <span>📑 تقرير الطالب</span>
     </div>
-    <p class="school-name">مجمع زايد التعليمي - الظيت</p>
   </header>
 
   <div class="container">
@@ -171,6 +169,8 @@
         // عرض بيانات الطالب
         let html = `
           <div class="student-info">
+            <img src="./icons/logo.png" alt="شعار المدرسة">
+            <p class="school-name">مجمع زايد التعليمي - الظيت</p>
             <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
             <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
           </div>
