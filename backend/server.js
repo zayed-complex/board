@@ -47,11 +47,9 @@ const staffMenu = [
   { title: "السياسات", type: "submenu", role: "staff" },
   { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn"},
   { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
-  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
-  { title: "رحلتي", type: "external", url: "https://idh.moe.gov.ae/" },
-  { title: "المنهل", type: "external", url: "https://sis.moe.gov.ae/" },
+  { title: "روابط مهمة", type: "external", url: "https://sso.ese.gov.ae/" },
   { title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
-  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
+  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
 app.get("/api/menu/:role", (req, res) => {
