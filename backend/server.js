@@ -29,7 +29,7 @@ const studentMenu = [
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
   { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
   { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
-  { title: "تقرير طالبة", type: "page", path: "/report.html" },
+  { title: "تقرير طالب", type: "page", path: "/report.html" },
   { title: "السياسات", type: "submenu", role: "student" },
   { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
   { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
