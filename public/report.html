@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تقرير الطالب</title>
+  <title>تقرير طالبة</title>
   <style>
     body {
       font-family: "Tahoma", Arial, sans-serif;
@@ -124,7 +124,7 @@
 <body>
   <header>
     <div class="header-top">
-      <span>📑 تقرير طالب</span>
+      <span>📑 تقرير طالبة</span>
     </div>
   </header>
 
@@ -157,7 +157,7 @@
         const res = await fetch(`/api/report/${id}`);
         if (!res.ok) {
           if (res.status === 404) {
-            errorDiv.textContent = "❌ الطالب غير موجود.";
+            errorDiv.textContent = "❌ الطالبة غير موجودة.";
           } else {
             errorDiv.textContent = "❌ خطأ في تحميل التقرير.";
           }
@@ -170,7 +170,7 @@
         let html = `
           <div class="student-info">
             <img src="/icons/logo.png" alt="شعار المدرسة">
-            <p><strong>مجمع زايد التعليمي - الظيت</strong></p>
+            <p><strong>مجمع زايد التعليمي - الظيت  / قسم الإناث</strong></p>
             <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
             <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
           </div>
