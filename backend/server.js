@@ -20,62 +20,56 @@ const STAFF_USERS = [
 ];
 
 // ===================== MENUS =====================
-const baseStudentMenu = [
+const studentMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
   { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
-  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "تقرير طالب", type: "page", path: "/report.html" },
-  { title: "السياسات", type: "submenu", role: "student" },
-  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
-  { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
-  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
+  { title: "السياسات", type: "submenu", role: "student" }
 ];
 
-const baseStaffMenu = [
+const staffMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
   { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
   { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
-  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
-  { title: "السياسات", type: "submenu", role: "staff" },
-  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn" },
-  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
-  { title: "روابط مهمة", type: "external", url: "https://sso.ese.gov.ae/" },
-  { title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
-  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" }
+  { title: "السياسات", type: "submenu", role: "staff" }
 ];
 
-// تعديل اسم ملفات PDF حسب القسم
-function getMenuForRole(role, section) {
-  const suffix = section === "female" ? "g" : "";
-  const clone = role === "student" ? JSON.parse(JSON.stringify(baseStudentMenu)) : JSON.parse(JSON.stringify(baseStaffMenu));
-  clone.forEach(item => {
-    if (item.type === "pdf" && ["cycle2.pdf","cycle3.pdf","timings.pdf","teachers.pdf","duties.pdf"].includes(item.filename)) {
-      const parts = item.filename.split(".");
-      item.filename = parts[0] + suffix + "." + parts[1];
-    }
-  });
-  return clone;
-}
+// ===================== MENU API =====================
+app.get("/api/menu/:role/:section", (req, res) => {
+  const { role, section } = req.params;
 
-// ===================== POLICIES =====================
-const studentPolicies = [
-  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
-  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
-  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
-  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
-  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
-  { title: "سياسة الحضور والغياب", filename: "attendance_policy.pdf" }
-];
+  let menu;
+  if (role === "student") menu = JSON.parse(JSON.stringify(studentMenu));
+  else if (role === "staff") menu = JSON.parse(JSON.stringify(staffMenu));
+  else return res.status(400).send("❌ دور غير معروف");
 
-const staffPolicies = [
-  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
-  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
-  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
-  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
-  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
-  { title: "سياسة الح
+  // تعديل ملفات PDF حسب القسم (male/female)
+  if (section === "male" || section === "female") {
+    menu.forEach(item => {
+      if (item.type === "pdf" && ["cycle2.pdf","cycle3.pdf","timings.pdf","teachers.pdf","duties.pdf"].includes(item.filename)) {
+        const parts = item.filename.split("."); // اسم + امتداد
+        item.filename = parts[0] + "g." + parts[1]; // إضافة g قبل الامتداد
+      }
+    });
+  }
+
+  res.json(menu);
+});
+
+// ===================== LOGIN =====================
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+  const user = STAFF_USERS.find(u => u.username === username && u.password === password);
+  if (user) return res.json({ success: true });
+  return res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
+});
+
+// ===================== START SERVER =====================
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
