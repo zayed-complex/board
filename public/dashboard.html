@@ -109,3 +109,45 @@ function renderMenu(menu) {
 
 function handleMenuClick(item) {
   pdfContainer.style.display = "none";
+  switch (item.type) {
+    case "pdf":
+      openPdf(item.filename);
+      break;
+    case "submenu":
+      alert("فتح السياسات"); // يمكن ربطها بالصفحة الحقيقية
+      break;
+    case "page":
+      window.location.href = item.path;
+      break;
+  }
+}
+
+function openPdf(filename) {
+  const downloadUrl = `./pdfs/${filename}`;
+  pdfViewer.src = `./pdfs/${filename}`;
+  pdfContainer.style.display = "block";
+  pdfContainer.scrollIntoView({ behavior: "smooth" });
+
+  downloadBtn.onclick = () => window.open(downloadUrl, "_blank");
+  printBtn.onclick = () => {
+    const printFrame = document.createElement('iframe');
+    printFrame.style.display = 'none';
+    printFrame.src = downloadUrl;
+    document.body.appendChild(printFrame);
+    printFrame.contentWindow.focus();
+    printFrame.contentWindow.print();
+  };
+  closeBtn.onclick = () => {
+    pdfContainer.style.display = "none";
+    pdfViewer.src = "";
+  };
+}
+
+// ==================== أزرار الرجوع / الإنهاء ====================
+document.getElementById("backBtn").onclick = () => window.location.href = "./index.html";
+document.getElementById("exitBtn").onclick = () => document.body.innerHTML = `<h2>👋 تم إنهاء الجلسة</h2>`;
+renderMenu(menuItems);
+</script>
+
+</body>
+</html>
