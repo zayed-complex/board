@@ -1,68 +1,84 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>تقرير طالب</title>
-<style>
-body { font-family: "Tahoma", Arial, sans-serif; background: #f5f6fa; margin: 0; padding: 0; text-align: center; }
-header { background: #2c3e50; color: #fff; padding: 15px; font-size: 22px; }
-.container { margin: 30px auto; max-width: 900px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-input[type="text"] { padding: 8px; font-size: 16px; width: 250px; border: 1px solid #ccc; border-radius: 5px; }
-button { padding: 9px 15px; font-size: 16px; background: #2980b9; border: none; color: #fff; border-radius: 5px; cursor: pointer; margin: 5px; }
-button:hover { background: #3498db; }
-.error { color: red; margin-top: 15px; font-weight: bold; }
-#printBtn { display: none; background: #27ae60; } #printBtn:hover { background: #2ecc71; }
-.notes-box { margin-top: 20px; padding: 15px; background: #fdf6e3; border-radius: 8px; text-align: right; border: 1px solid #eed; }
-.notes-box h3 { color: #b58900; margin-top: 0; }
-</style>
-</head>
-<body>
-<header>📑 تقرير الطالب</header>
-
-<div class="container">
-  <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
-  <button onclick="loadReport()">عرض التقرير</button>
-  <button id="printBtn" onclick="window.print()">🖨️ طباعة</button>
-  <div id="error" class="error"></div>
-  <div id="report"></div>
-</div>
-
-<script>
 async function loadReport() {
   const id = document.getElementById("studentId").value.trim();
+  const section = sessionStorage.getItem("section-role") || "male"; // male/female
   const reportDiv = document.getElementById("report");
   const errorDiv = document.getElementById("error");
   const printBtn = document.getElementById("printBtn");
-  const section = sessionStorage.getItem("section") || "male";
-  reportDiv.innerHTML = ""; errorDiv.textContent = ""; printBtn.style.display = "none";
+  reportDiv.innerHTML = "";
+  errorDiv.textContent = "";
+  printBtn.style.display = "none";
 
-  if (!id) { errorDiv.textContent = "❌ الرجاء إدخال رقم الهوية."; return; }
+  if (!id) {
+    errorDiv.textContent = "❌ الرجاء إدخال رقم الهوية.";
+    return;
+  }
 
   try {
     const res = await fetch(`/api/report/${id}?section=${section}`);
-    if (!res.ok) throw new Error("خطأ في التحميل");
+    if (!res.ok) {
+      if (res.status === 404) {
+        errorDiv.textContent = "❌ الطالب غير موجود.";
+      } else {
+        errorDiv.textContent = "❌ خطأ في تحميل التقرير.";
+      }
+      return;
+    }
+
     const data = await res.json();
 
-    let html = `<div><h3>${data.student["الاسم"]}</h3><p>الشعبة: ${data.student["الشعبة"]}</p></div>
-      <table border="1" style="width:100%;border-collapse:collapse;margin-top:10px;">
-      <thead><tr><th>المادة</th><th>تكويني</th><th>مشاركة</th><th>مهمة</th><th>التزام</th></tr></thead><tbody>`;
+    // عرض بيانات الطالب كما كان سابقاً
+    let html = `
+      <div class="student-info">
+        <img src="/icons/logo.png" alt="شعار المدرسة">
+        <p><strong>مجمع زايد التعليمي - الظيت</strong></p>
+        <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
+        <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>المادة</th>
+            <th>تكويني</th>
+            <th>مشاركة</th>
+            <th>مهمة</th>
+            <th>التزام</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
 
     let notes = [];
     data.subjects.forEach(sub => {
-      html += `<tr><td>${sub.name}</td><td>${sub.formative}</td><td>${sub.participation}</td><td>${sub.task}</td><td>${sub.commitment}</td></tr>`;
-      if (sub.note && sub.note.trim() && sub.note !== "-") notes.push(`${sub.name}: ${sub.note}`);
+      html += `
+        <tr>
+          <td>${sub.name}</td>
+          <td>${sub.formative}</td>
+          <td>${sub.participation}</td>
+          <td>${sub.task}</td>
+          <td>${sub.commitment}</td>
+        </tr>
+      `;
+      if (sub.note && sub.note.trim() && sub.note !== "-") {
+        notes.push(`${sub.name}: ${sub.note}`);
+      }
     });
+
     html += "</tbody></table>";
 
-    if (notes.length > 0) html += `<div class="notes-box"><h3>📝 الملاحظات:</h3><ul>${notes.map(n => `<li>${n}</li>`).join("")}</ul></div>`;
+    if (notes.length > 0) {
+      html += `
+        <div class="notes-box">
+          <h3>📝 الملاحظات:</h3>
+          <ul>${notes.map(n => `<li>${n}</li>`).join("")}</ul>
+        </div>
+      `;
+    }
 
     reportDiv.innerHTML = html;
     printBtn.style.display = "inline-block";
+
   } catch (err) {
-    console.error(err);
-    errorDiv.textContent = "❌ حدث خطأ أثناء تحميل التقرير.";
+    console.error("Error loading report:", err);
+    errorDiv.textContent = "❌ حدث خطأ غير متوقع.";
   }
 }
-</script>
-</body>
-</html>

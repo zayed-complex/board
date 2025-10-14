@@ -1,66 +1,94 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📚 الصفحة الرئيسية</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>تسجيل الدخول - مجمع زايد التعليمي</title>
 <style>
-body {
-  font-family: "Tahoma", Arial, sans-serif;
-  background: #f2f5f8;
-  text-align: center;
-  padding: 30px;
-}
-h1 { color: #333; }
-select, button {
-  padding: 10px 15px;
-  margin: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 1em;
-}
-button {
-  background: #3498db;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-button:hover { background: #217dbb; }
+body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 50px; background: #f4f6f8; }
+h1 { margin-bottom: 30px; color: #333; }
+select, input, button { font-size: 16px; margin: 5px; }
+button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; background: #3498db; color: #fff; transition: 0.2s; }
+button:hover { background: #217dbb; transform: translateY(-2px); }
+.hidden { display: none; }
 </style>
 </head>
 <body>
-  <h1>🎓 بوابة المدرسة</h1>
-  <p>اختر القسم والدور للدخول</p>
 
-  <label>القسم:</label>
-  <select id="genderSelect">
-    <option value="male">بنين</option>
-    <option value="female">بنات</option>
-  </select>
+<h1>🔐 نظام الدخول الموحّد</h1>
+<h2>مرحباً بك في مجمع زايد التعليمي</h2>
 
-  <br>
+<label for="sectionSelect">اختر القسم</label>
+<select id="sectionSelect">
+  <option value="">-- اختر القسم --</option>
+  <option value="male">قسم الذكور</option>
+  <option value="female">قسم الإناث</option>
+</select>
 
-  <label>الدور:</label>
-  <select id="roleSelect">
-    <option value="student">طالب / ولي أمر</option>
-    <option value="staff">معلم / إداري</option>
-  </select>
+<label for="roleSelect">اختر الدور</label>
+<select id="roleSelect" onchange="handleRoleChange()">
+  <option value="">-- اختر الدور --</option>
+  <option value="student">طالب / ولي أمر</option>
+  <option value="staff">معلم / إداري</option>
+</select>
 
-  <br>
-
-  <button id="enterBtn">دخول</button>
+<div id="loginFields" class="hidden">
+  <label>اسم المستخدم</label>
+  <input type="text" id="username" placeholder="أدخل اسم المستخدم" />
+  <label>كلمة المرور</label>
+  <input type="password" id="password" placeholder="أدخل كلمة المرور" />
+  <button onclick="login()">تسجيل الدخول</button>
+  <p id="loginMessage" style="color:red; margin-top:10px;"></p>
+</div>
 
 <script>
-document.getElementById("enterBtn").onclick = () => {
+function handleRoleChange() {
   const role = document.getElementById("roleSelect").value;
-  const gender = document.getElementById("genderSelect").value;
+  const section = document.getElementById("sectionSelect").value || "male";
+  const loginFields = document.getElementById("loginFields");
+  const msg = document.getElementById("loginMessage");
+  if (msg) msg.textContent = "";
 
-  sessionStorage.setItem("role", role);
-  sessionStorage.setItem("gender", gender);
+  if (!role) return;
 
-  // الانتقال مع تمرير الدور والقسم
-  window.location.href = `dashboard.html?role=${role}&gender=${gender}`;
-};
+  if (role === "staff") {
+    // المعلم/إداري يحتاج تسجيل دخول
+    loginFields.classList.remove("hidden");
+  } else if (role === "student") {
+    // الطالب/ولي أمر لا يحتاج تسجيل دخول
+    sessionStorage.setItem("role", "student");
+    sessionStorage.setItem("section-role", section);
+    window.location.href = `dashboard.html?role=student&section=${section}`;
+  }
+}
+
+function login() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const section = document.getElementById("sectionSelect").value || "male";
+  const msg = document.getElementById("loginMessage");
+  msg.textContent = "";
+
+  if (!username || !password) {
+    msg.textContent = "❌ يرجى إدخال اسم المستخدم وكلمة المرور";
+    return;
+  }
+
+  // تحقق تجريبي
+  const validUsers = [
+    { username: "admin", password: "1234" },
+    { username: "staff", password: "abcd" }
+  ];
+
+  const user = validUsers.find(u => u.username === username && u.password === password);
+  if (user) {
+    sessionStorage.setItem("role", "staff");
+    sessionStorage.setItem("section-role", section);
+    window.location.href = `dashboard.html?role=staff&section=${section}`;
+  } else {
+    msg.textContent = "❌ اسم المستخدم أو كلمة المرور خاطئة";
+  }
+}
 </script>
 </body>
 </html>
