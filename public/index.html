@@ -7,7 +7,7 @@
 <style>
 body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 50px; background: #f4f6f8; }
 h1 { margin-bottom: 30px; color: #333; }
-select, input, button { font-size: 16px; margin: 5px; }
+select, input, button { font-size: 16px; margin: 5px; padding: 8px; }
 button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; background: #3498db; color: #fff; transition: 0.2s; }
 button:hover { background: #217dbb; transform: translateY(-2px); }
 .hidden { display: none; }
@@ -19,30 +19,33 @@ footer { text-align: center; padding: 15px; font-size: 0.9em; color: #777; margi
 <h1>🔐 نظام الدخول الموحّد</h1>
 <h2>مرحباً بك في مجمّع زايد التعليمي - الظيت</h2>
 
+<!-- اختيار القسم -->
 <label for="section">اختر القسم</label>
-<select id="section" onchange="showRoleOptions()">
+<select id="section">
   <option value="">-- اختر القسم --</option>
   <option value="male">👨 قسم الذكور</option>
   <option value="female">👩 قسم الإناث</option>
 </select>
 
-<div id="roleDiv" class="hidden">
+<!-- اختيار الدور -->
+<div id="roleDiv" class="hidden" style="margin-top:20px;">
   <label for="role">خيارات الدخول</label>
-  <select id="role" onchange="handleRoleChange()">
+  <select id="role">
     <option value="">-- اختر الدور --</option>
     <option value="student">👨‍🎓 طالب / ولي الأمر</option>
     <option value="staff">🧑‍🏫 معلم / إداري</option>
   </select>
 </div>
 
-<div id="staffFields" class="hidden">
+<!-- حقول الموظفين -->
+<div id="staffFields" class="hidden" style="margin-top:15px;">
   <label for="username">اسم المستخدم</label>
   <input type="text" id="username" placeholder="أدخل اسم المستخدم" />
 
   <label for="password">كلمة المرور</label>
   <input type="password" id="password" placeholder="أدخل كلمة المرور" />
 
-  <button onclick="login()">تسجيل الدخول</button>
+  <button id="loginBtn">تسجيل الدخول</button>
   <p id="loginMessage" style="color:red; margin-top:10px;"></p>
 </div>
 
@@ -51,13 +54,65 @@ footer { text-align: center; padding: 15px; font-size: 0.9em; color: #777; margi
 </footer>
 
 <script>
-function showRoleOptions() {
-  const section = document.getElementById("section").value;
-  document.getElementById("roleDiv").classList.toggle("hidden", section === "");
-}
+const sectionSelect = document.getElementById("section");
+const roleDiv = document.getElementById("roleDiv");
+const roleSelect = document.getElementById("role");
+const staffFields = document.getElementById("staffFields");
+const msg = document.getElementById("loginMessage");
+const loginBtn = document.getElementById("loginBtn");
 
-function handleRoleChange() {
-  const role = document.getElementById("role").value;
-  const section = document.getElementById("section").value;
-  const staffFields = document.getElementById("staffFields");
-  const msg =
+// عند اختيار القسم
+sectionSelect.addEventListener("change", () => {
+  const section = sectionSelect.value;
+  if (section) {
+    roleDiv.classList.remove("hidden");
+    staffFields.classList.add("hidden");
+    roleSelect.value = "";
+    sessionStorage.setItem("section", section);
+  } else {
+    roleDiv.classList.add("hidden");
+    staffFields.classList.add("hidden");
+  }
+});
+
+// عند اختيار الدور
+roleSelect.addEventListener("change", () => {
+  const role = roleSelect.value;
+  const section = sessionStorage.getItem("section");
+
+  msg.textContent = "";
+
+  if (role === "student") {
+    sessionStorage.setItem("role", "student");
+    window.location.href = `dashboard.html?section=${section}&role=student`;
+  } else if (role === "staff") {
+    staffFields.classList.remove("hidden");
+  } else {
+    staffFields.classList.add("hidden");
+  }
+});
+
+// تسجيل الدخول للموظفين
+loginBtn.addEventListener("click", () => {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const section = sessionStorage.getItem("section");
+
+  msg.textContent = "";
+
+  if (!username || !password) {
+    msg.textContent = "❌ يرجى إدخال اسم المستخدم وكلمة المرور";
+    return;
+  }
+
+  if (username === "admin" && password === "1234") {
+    sessionStorage.setItem("role", "staff");
+    window.location.href = `dashboard.html?section=${section}&role=staff`;
+  } else {
+    msg.textContent = "❌ بيانات الدخول غير صحيحة";
+  }
+});
+</script>
+
+</body>
+</html>
