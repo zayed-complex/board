@@ -1,251 +1,68 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تقرير طالب</title>
-  <style>
-    body {
-      font-family: "Tahoma", Arial, sans-serif;
-      background: #f5f6fa;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background: #2c3e50;
-      color: #fff;
-      padding: 15px;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .header-top img {
-      width: 60px;
-      height: 60px;
-      border-radius: 8px;
-      background: #fff;
-      padding: 4px;
-    }
-    .school-name {
-      font-size: 18px;
-      color: #ecf0f1;
-      margin: 0;
-    }
-    .container {
-      margin: 30px auto;
-      max-width: 900px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .search-box {
-      margin-bottom: 20px;
-    }
-    input[type="text"] {
-      padding: 8px;
-      font-size: 16px;
-      width: 250px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      padding: 9px 15px;
-      font-size: 16px;
-      background: #2980b9;
-      border: none;
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 5px;
-    }
-    button:hover {
-      background: #3498db;
-    }
-    .student-info {
-      margin: 15px 0;
-      font-size: 18px;
-      color: #2c3e50;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    table th, table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-    }
-    table th {
-      background: #34495e;
-      color: #fff;
-    }
-    .error {
-      color: red;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    #printBtn {
-      display: none; /* يظهر فقط عند تحميل تقرير */
-      background: #27ae60;
-    }
-    #printBtn:hover {
-      background: #2ecc71;
-    }
-    .notes-box {
-      margin-top: 20px;
-      padding: 15px;
-      background: #fdf6e3;
-      border: 1px solid #eed;
-      border-radius: 8px;
-      text-align: right;
-    }
-    .notes-box h3 {
-      margin-top: 0;
-      color: #b58900;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>تقرير طالب</title>
+<style>
+body { font-family: "Tahoma", Arial, sans-serif; background: #f5f6fa; margin: 0; padding: 0; text-align: center; }
+header { background: #2c3e50; color: #fff; padding: 15px; font-size: 22px; }
+.container { margin: 30px auto; max-width: 900px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+input[type="text"] { padding: 8px; font-size: 16px; width: 250px; border: 1px solid #ccc; border-radius: 5px; }
+button { padding: 9px 15px; font-size: 16px; background: #2980b9; border: none; color: #fff; border-radius: 5px; cursor: pointer; margin: 5px; }
+button:hover { background: #3498db; }
+.error { color: red; margin-top: 15px; font-weight: bold; }
+#printBtn { display: none; background: #27ae60; } #printBtn:hover { background: #2ecc71; }
+.notes-box { margin-top: 20px; padding: 15px; background: #fdf6e3; border-radius: 8px; text-align: right; border: 1px solid #eed; }
+.notes-box h3 { color: #b58900; margin-top: 0; }
+</style>
 </head>
-<!-- ==================== أزرار الرجوع والإنهاء ==================== -->
-<div id="navControls">
-  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
-  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
-</div>
 <body>
-  <header>
-    <div class="header-top">
-      <span>📑 تقرير طالب</span>
-    </div>
-  </header>
+<header>📑 تقرير الطالب</header>
 
-  <div class="container">
-    <div class="search-box">
-      <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
-      <button onclick="loadReport()">عرض التقرير</button>
-      <button id="printBtn" onclick="window.print()">🖨️ طباعة</button>
-    </div>
-    <div id="error" class="error"></div>
-    <div id="report"></div>
-  </div>
+<div class="container">
+  <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
+  <button onclick="loadReport()">عرض التقرير</button>
+  <button id="printBtn" onclick="window.print()">🖨️ طباعة</button>
+  <div id="error" class="error"></div>
+  <div id="report"></div>
+</div>
 
-  <script>
-    async function loadReport() {
-      const id = document.getElementById("studentId").value.trim();
-      const reportDiv = document.getElementById("report");
-      const errorDiv = document.getElementById("error");
-      const printBtn = document.getElementById("printBtn");
-      reportDiv.innerHTML = "";
-      errorDiv.textContent = "";
-      printBtn.style.display = "none";
+<script>
+async function loadReport() {
+  const id = document.getElementById("studentId").value.trim();
+  const reportDiv = document.getElementById("report");
+  const errorDiv = document.getElementById("error");
+  const printBtn = document.getElementById("printBtn");
+  const section = sessionStorage.getItem("section") || "male";
+  reportDiv.innerHTML = ""; errorDiv.textContent = ""; printBtn.style.display = "none";
 
-      if (!id) {
-        errorDiv.textContent = "❌ الرجاء إدخال رقم الهوية.";
-        return;
-      }
+  if (!id) { errorDiv.textContent = "❌ الرجاء إدخال رقم الهوية."; return; }
 
-      try {
-        const res = await fetch(`/api/report/${id}`);
-        if (!res.ok) {
-          if (res.status === 404) {
-            errorDiv.textContent = "❌ الطالبة غير موجودة.";
-          } else {
-            errorDiv.textContent = "❌ خطأ في تحميل التقرير.";
-          }
-          return;
-        }
+  try {
+    const res = await fetch(`/api/report/${id}?section=${section}`);
+    if (!res.ok) throw new Error("خطأ في التحميل");
+    const data = await res.json();
 
-        const data = await res.json();
+    let html = `<div><h3>${data.student["الاسم"]}</h3><p>الشعبة: ${data.student["الشعبة"]}</p></div>
+      <table border="1" style="width:100%;border-collapse:collapse;margin-top:10px;">
+      <thead><tr><th>المادة</th><th>تكويني</th><th>مشاركة</th><th>مهمة</th><th>التزام</th></tr></thead><tbody>`;
 
-        // عرض بيانات الطالب
-        let html = `
-          <div class="student-info">
-            <img src="/icons/logo.png" alt="شعار المدرسة">
-            <p><strong>مجمع زايد التعليمي - الظيت</strong></p>
-            <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
-            <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>المادة</th>
-                <th>تكويني</th>
-                <th>مشاركة</th>
-                <th>مهمة</th>
-                <th>التزام</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
+    let notes = [];
+    data.subjects.forEach(sub => {
+      html += `<tr><td>${sub.name}</td><td>${sub.formative}</td><td>${sub.participation}</td><td>${sub.task}</td><td>${sub.commitment}</td></tr>`;
+      if (sub.note && sub.note.trim() && sub.note !== "-") notes.push(`${sub.name}: ${sub.note}`);
+    });
+    html += "</tbody></table>";
 
-        let notes = [];
+    if (notes.length > 0) html += `<div class="notes-box"><h3>📝 الملاحظات:</h3><ul>${notes.map(n => `<li>${n}</li>`).join("")}</ul></div>`;
 
-        data.subjects.forEach(sub => {
-          html += `
-            <tr>
-              <td>${sub.name}</td>
-              <td>${sub.formative}</td>
-              <td>${sub.participation}</td>
-              <td>${sub.task}</td>
-              <td>${sub.commitment}</td>
-            </tr>
-          `;
-          if (sub.note && sub.note.trim() && sub.note !== "-") {
-            notes.push(`${sub.name}: ${sub.note}`);
-          }
-        });
-
-        html += "</tbody></table>";
-
-        // عرض الملاحظات
-        if (notes.length > 0) {
-          html += `
-            <div class="notes-box">
-              <h3>📝 الملاحظات:</h3>
-              <ul>${notes.map(n => `<li>${n}</li>`).join("")}</ul>
-            </div>
-          `;
-        }
-
-        reportDiv.innerHTML = html;
-
-        // إظهار زر الطباعة
-        printBtn.style.display = "inline-block";
-
-      } catch (err) {
-        console.error("Error loading report:", err);
-        errorDiv.textContent = "❌ حدث خطأ غير متوقع.";
-      }
-    }
-// ==================== أزرار الرجوع / الإنهاء ====================
-document.getElementById("backBtn").onclick = () => {
-  window.location.href = "/index.html";
-};
-
-document.getElementById("exitBtn").onclick = () => {
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    window.close();
-  } else {
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
-        <h2>👋 تم إنهاء الجلسة</h2>
-        <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
-        <button onclick="window.location.href='/index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
-          🔁 عودة للرئيسية
-        </button>
-      </div>
-    `;
+    reportDiv.innerHTML = html;
+    printBtn.style.display = "inline-block";
+  } catch (err) {
+    console.error(err);
+    errorDiv.textContent = "❌ حدث خطأ أثناء تحميل التقرير.";
   }
-};
-  </script>
+}
+</script>
 </body>
 </html>

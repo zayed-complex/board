@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>تسجيل الدخول - مجمّع زايد التعليمي- الظيت</title>
+<title>تسجيل الدخول - مجمّع زايد التعليمي</title>
 <style>
 body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 50px; background: #f4f6f8; }
 h1 { margin-bottom: 30px; color: #333; }
@@ -17,19 +17,23 @@ footer { text-align: center; padding: 15px; font-size: 0.9em; color: #777; margi
 <body>
 
 <h1>🔐 نظام الدخول الموحّد</h1>
-<h2>مرحباً بك في مجمّع زايد التعليمي- الظيت</h2>
+<h2>مرحباً بك في مجمّع زايد التعليمي - الظيت</h2>
 
-<!-- إعدادات PWA -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#2c3e50">
-<link rel="icon" href="/icons/icon-192.png" type="image/png">
-
-<label for="role">خيارات الدخول</label>
-<select id="role" onchange="handleRoleChange()">
-  <option value="">-- اختر الدور --</option>
-  <option value="student">👨‍🎓 طالب / ولي الأمر</option>
-  <option value="staff">🧑‍🏫 معلم / إداري</option>
+<label for="section">اختر القسم</label>
+<select id="section" onchange="showRoleOptions()">
+  <option value="">-- اختر القسم --</option>
+  <option value="male">👨 قسم الذكور</option>
+  <option value="female">👩 قسم الإناث</option>
 </select>
+
+<div id="roleDiv" class="hidden">
+  <label for="role">خيارات الدخول</label>
+  <select id="role" onchange="handleRoleChange()">
+    <option value="">-- اختر الدور --</option>
+    <option value="student">👨‍🎓 طالب / ولي الأمر</option>
+    <option value="staff">🧑‍🏫 معلم / إداري</option>
+  </select>
+</div>
 
 <div id="staffFields" class="hidden">
   <label for="username">اسم المستخدم</label>
@@ -43,52 +47,17 @@ footer { text-align: center; padding: 15px; font-size: 0.9em; color: #777; margi
 </div>
 
 <footer>
-  <p>© جميع الحقوق محفوظة - مجمّع زايد التعليمي- الظيت</p>
+  <p>© جميع الحقوق محفوظة - مجمّع زايد التعليمي - الظيت</p>
 </footer>
 
 <script>
+function showRoleOptions() {
+  const section = document.getElementById("section").value;
+  document.getElementById("roleDiv").classList.toggle("hidden", section === "");
+}
+
 function handleRoleChange() {
   const role = document.getElementById("role").value;
+  const section = document.getElementById("section").value;
   const staffFields = document.getElementById("staffFields");
-  const msg = document.getElementById("loginMessage");
-  msg.textContent = "";
-
-  if (role === "student") {
-    sessionStorage.setItem("role", "student");
-    window.location.href = "dashboard.html?role=student";
-  } else if (role === "staff") {
-    staffFields.classList.remove("hidden");
-  } else {
-    staffFields.classList.add("hidden");
-  }
-}
-
-function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const msg = document.getElementById("loginMessage");
-  msg.textContent = "";
-
-  if (!username || !password) {
-    msg.textContent = "❌ يرجى إدخال اسم المستخدم وكلمة المرور";
-    return;
-  }
-
-  // تحقق تجريبي
-  if (username === "admin" && password === "1234") {
-    sessionStorage.setItem("role", "staff");
-    window.location.href = "dashboard.html?role=staff";
-  } else {
-    msg.textContent = "❌ بيانات الدخول غير صحيحة";
-  }
-}
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(() => console.log('✅ Service Worker Recorded'))
-       .catch(err => console.error('❌ خطأ في تسجيل Service Worker:', err));
-}
-</script>
-</body>
-</html>
+  const msg =
