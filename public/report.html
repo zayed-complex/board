@@ -1,90 +1,179 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تقرير الطالب</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>📑 تقرير الطالب</title>
+  <style>
+    body {
+      font-family: "Tahoma", Arial, sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: #2c3e50;
+      color: #fff;
+      padding: 15px;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .container {
+      margin: 30px auto;
+      max-width: 900px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    input[type="text"] {
+      padding: 8px;
+      font-size: 16px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 9px 15px;
+      font-size: 16px;
+      background: #2980b9;
+      border: none;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #3498db; }
+    .error { color: red; margin-top: 15px; font-weight: bold; }
+    #printBtn { display: none; background: #27ae60; }
+    #printBtn:hover { background: #2ecc71; }
+    .notes-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fdf6e3;
+      border: 1px solid #eed;
+      border-radius: 8px;
+      text-align: right;
+    }
+    .notes-box h3 { margin-top: 0; color: #b58900; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    table th {
+      background: #34495e;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <img src="logo.png" alt="شعار المدرسة" class="logo" />
-    <h1>تقرير الطالب</h1>
-  </header>
+  <header>📑 تقرير الطالب</header>
 
-  <main>
-    <input id="studentId" placeholder="أدخل رقم الهوية" />
-    <button onclick="searchReport()">بحث</button>
-
+  <div class="container">
+    <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
+    <button onclick="loadReport()">عرض التقرير</button>
+    <button id="printBtn" onclick="window.print()">🖨️ طباعة</button>
+    <div id="error" class="error"></div>
     <div id="report"></div>
-  </main>
+  </div>
 
   <script>
-    // قراءة role وsection من الرابط
+    // ✅ قراءة role و section من الرابط أو التخزين
     const params = new URLSearchParams(window.location.search);
-    const role = params.get("role") || "student";
-    const section = params.get("section") || "male";
+    const role = params.get("role") || sessionStorage.getItem("role") || "student";
+    const section = params.get("section") || sessionStorage.getItem("section") || "male";
 
-    // حفظ في sessionStorage كنسخة احتياطية
     sessionStorage.setItem("role", role);
     sessionStorage.setItem("section", section);
 
-    async function searchReport() {
+    async function loadReport() {
       const id = document.getElementById("studentId").value.trim();
+      const reportDiv = document.getElementById("report");
+      const errorDiv = document.getElementById("error");
+      const printBtn = document.getElementById("printBtn");
+
+      reportDiv.innerHTML = "";
+      errorDiv.textContent = "";
+      printBtn.style.display = "none";
+
       if (!id) {
-        alert("الرجاء إدخال رقم الهوية");
+        errorDiv.textContent = "❌ الرجاء إدخال رقم الهوية.";
         return;
       }
 
       try {
+        // ✅ تمرير القسم الصحيح للباكإند
         const res = await fetch(`/api/report/${id}?section=${section}`);
-        const data = await res.json();
-
-        const container = document.getElementById("report");
-        container.innerHTML = "";
-
-        if (data.error) {
-          container.innerHTML = `<p style="color:red">${data.error}</p>`;
+        if (!res.ok) {
+          errorDiv.textContent = res.status === 404 ? "❌ الطالب غير موجود." : "❌ خطأ في تحميل التقرير.";
           return;
         }
 
-        const info = document.createElement("div");
-        info.innerHTML = `<h2>${data.student["الاسم"]}</h2>
-                          <p>الشعبة: ${data.student["الشعبة"]}</p>`;
-        container.appendChild(info);
+        const data = await res.json();
 
-        const table = document.createElement("table");
-        table.innerHTML = `
-          <thead>
-            <tr>
-              <th>المادة</th>
-              <th>تكويني</th>
-              <th>مشاركة</th>
-              <th>مهمة</th>
-              <th>التزام</th>
-              <th>ملاحظة</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.subjects
-              .map(
-                s => `
+        let html = `
+          <div class="student-info">
+            <img src="/icons/logo.png" alt="شعار المدرسة" width="80">
+            <p><strong>مجمع زايد التعليمي - الظيت</strong></p>
+            <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
+            <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
+          </div>
+          <table>
+            <thead>
               <tr>
-                <td>${s.name}</td>
-                <td>${s.formative}</td>
-                <td>${s.participation}</td>
-                <td>${s.task}</td>
-                <td>${s.commitment}</td>
-                <td>${s.note}</td>
-              </tr>`
-              )
-              .join("")}
-          </tbody>
+                <th>المادة</th>
+                <th>تكويني</th>
+                <th>مشاركة</th>
+                <th>مهمة</th>
+                <th>التزام</th>
+              </tr>
+            </thead>
+            <tbody>
         `;
-        container.appendChild(table);
+
+        let notes = [];
+        data.subjects.forEach(sub => {
+          html += `
+            <tr>
+              <td>${sub.name}</td>
+              <td>${sub.formative}</td>
+              <td>${sub.participation}</td>
+              <td>${sub.task}</td>
+              <td>${sub.commitment}</td>
+            </tr>
+          `;
+          if (sub.note && sub.note.trim() && sub.note !== "-") {
+            notes.push(`${sub.name}: ${sub.note}`);
+          }
+        });
+
+        html += "</tbody></table>";
+
+        if (notes.length > 0) {
+          html += `
+            <div class="notes-box">
+              <h3>📝 الملاحظات:</h3>
+              <ul>${notes.map(n => `<li>${n}</li>`).join("")}</ul>
+            </div>
+          `;
+        }
+
+        reportDiv.innerHTML = html;
+        printBtn.style.display = "inline-block";
+
       } catch (err) {
-        console.error(err);
-        alert("حدث خطأ أثناء تحميل التقرير");
+        console.error("Error loading report:", err);
+        errorDiv.textContent = "❌ حدث خطأ غير متوقع.";
       }
     }
   </script>
