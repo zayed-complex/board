@@ -73,6 +73,7 @@ app.get("/api/report/:id", (req, res) => {
 
   // ✅ تصحيح المسار إلى ملف Excel
   const excelFile = path.join(__dirname, "../data/students.xlsx");
+  console.log("🔎 Looking for Excel file at:", excelFile);
 
   if (!fs.existsSync(excelFile)) {
     return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
@@ -122,7 +123,6 @@ app.get("/api/report/:id", (req, res) => {
     subjects
   });
 });
-console.log("🔎 Looking for Excel file at:", excelFile);
 
 // ===================== START SERVER =====================
 app.listen(PORT, () => {
