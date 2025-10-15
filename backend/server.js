@@ -97,7 +97,7 @@ function loadStudentsFromExcel() {
     const className = row[2] ? String(row[2]).trim() : "-";
 
     const subjects = subject_names.map((sub, i) => {
-      const base = 3 + i * 5; // من العمود الرابع تبدأ المواد
+      const base = 4 + i * 5; // من العمود الرابع تبدأ المواد
       return {
         name: sub,
         formative: row[base] || "-",
