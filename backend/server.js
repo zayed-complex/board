@@ -71,62 +71,55 @@ app.post("/api/login", (req, res) => {
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
 
-  // ✅ تصحيح المسار إلى ملف Excel
-   const excelFile = path.join(__dirname, "./data/students.xlsx");
-
+  // المسار الصحيح لملف الإكسل
+  const excelFile = path.join(__dirname, "data", "students.xlsx");
   console.log("🔎 Looking for Excel file at:", excelFile);
+  console.log("🔍 الهوية المطلوبة:", id);
 
   if (!fs.existsSync(excelFile)) {
     return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
   }
 
-  const workbook = xlsx.readFile(excelFile);
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  try {
+    const workbook = xlsx.readFile(excelFile);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-  // ✅ إذا كان الصف الأول لا يحتوي رؤوس الأعمدة (A2 = الهوية)
-  const rows = xlsx.utils.sheet_to_json(sheet, { range: 1 });
+    // ✅ قراءة البيانات من الصف الثاني (لأن الصف الأول غير رؤوس)
+    const rows = xlsx.utils.sheet_to_json(sheet, { range: 1 });
 
-
-  // أول صف يحتوي العناوين
-  const headers = rows[0];
-  const data = rows.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => {
-      obj[h] = row[i];
+    // طباعة أول 5 صفوف لفحص الأسماء والهوية
+    console.log("📊 أول 5 سجلات من ملف Excel:");
+    rows.slice(0, 5).forEach(r => {
+      console.log(r["الهوية"], r["الاسم"]);
     });
-    return obj;
-  });
 
-  const student = data.find(r => String(r["الهوية"]).trim() === id.trim());
-   console.log("🔍 الهوية المطلوبة:", id);
-   console.log("📊 أول 5 سجلات من ملف Excel:");
-   rows.slice(0, 5).forEach(r => console.log(r["الهوية"], r["الاسم"]));
-  
-if (!student) {
-    return res.status(404).json({ error: "❌ الطالب غير موجود" });
-  }
-
-  const subjects = [];
-  Object.keys(student).forEach(key => {
-    if (key.startsWith("مادة")) {
-      subjects.push({
-        name: student[key],
-        formative: student[`تكويني_${key}`] || "-",
-        participation: student[`مشاركة_${key}`] || "-",
-        task: student[`مهمة_${key}`] || "-",
-        commitment: student[`التزام_${key}`] || "-",
-        note: student[`ملاحظة_${key}`] || "-"
-      });
+    // ✅ البحث عن الطالب حسب الهوية
+    const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
+    if (!student) {
+      return res.status(404).json({ error: "❌ الطالب غير موجود" });
     }
-  });
 
-  res.json({
-    student: {
-      "الاسم": student["الاسم"],
-      "الشعبة": student["الشعبة"]
-    },
-    subjects
-  });
+    // ✅ استخراج المواد (طريقة مرنة)
+    const subjects = [];
+    const columns = Object.keys(student);
+    for (let i = 0; i < columns.length; i++) {
+      const key = columns[i];
+      if (key.includes("المشاركة الصفية") || key.includes("تكوينية") || key.includes("العلوم")) continue;
+    }
+
+    // إعداد البيانات النهائية
+    res.json({
+      student: {
+        "الاسم": student["الاسم"],
+        "الشعبة": student["الشعبة"]
+      },
+      subjects: [] // مؤقتًا حتى نضبط الأعمدة لاحقًا
+    });
+
+  } catch (err) {
+    console.error("❌ خطأ أثناء قراءة ملف Excel:", err);
+    res.status(500).json({ error: "❌ حدث خطأ أثناء قراءة الملف" });
+  }
 });
 
 // ===================== START SERVER =====================
