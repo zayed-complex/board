@@ -75,59 +75,61 @@ app.get("/api/report/:id", (req, res) => {
     "الأحياء","الفيزياء","الكيمياء"
   ];
 
-  console.log("🔎 Looking for Excel file at:", excelFile);
-  console.log("🔍 الهوية المطلوبة:", id);
+  function loadStudentsFromExcel() {
+  const EXCEL_PATH = path.join(__dirname, "data", "students.xlsx");
 
-  if (!fs.existsSync(excelFile)) {
-    return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
+  if (!fs.existsSync(EXCEL_PATH)) {
+    console.warn("⚠️ ملف Excel غير موجود:", EXCEL_PATH);
+    return {};
   }
 
-  try {
-    const workbook = xlsx.readFile(excelFile);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
+  const workbook = xlsx.readFile(EXCEL_PATH, { cellText: false, cellDates: false });
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+  const rows = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: "-" });
 
-    console.log("📊 عدد الصفوف:", rows.length);
+  const students = {};
+  const dataRows = rows.slice(1); // الصف الأول رؤوس الأعمدة فقط
 
-    const student = rows.find(r => {
-      const key = Object.keys(r).find(k => k.trim().includes("الهوية"));
-      return key && String(r[key]).trim() === id.trim();
-    });
+  dataRows.forEach((row, index) => {
+    let studentId = row[0]; // ✅ الهوية في العمود الأول دائمًا
+    if (!studentId || studentId === "-") return;
 
-    if (!student) {
-      return res.status(404).json({ error: "❌ الطالب غير موجود" });
-    }
+    // تنظيف وتحويل الهوية إلى نص فقط
+    studentId = String(studentId).replace(/[^\d]/g, "").trim();
+    if (!studentId) return;
 
-    // استخراج البيانات بناءً على الأعمدة الثابتة
-    const keys = Object.keys(student);
-    const rowValues = Object.values(student);
-
-    // الأعمدة الثلاثة الأولى هي (الهوية - الاسم - الشعبة)
-    const name = student["الاسم"] || rowValues[1];
-    const className = student["الشعبة"] || rowValues[2];
+    const name = row[1] ? String(row[1]).trim() : "-";       // العمود 2: الاسم
+    const className = row[2] ? String(row[2]).trim() : "-";  // العمود 3: الشعبة ✅
 
     const subjects = subject_names.map((sub, i) => {
-      const base = 3 + i * 5; // نبدأ بعد الأعمدة الأساسية
+      const base = 3 + i * 5; // من العمود الرابع تبدأ المواد
       return {
         name: sub,
-        formative: rowValues[base] || "-",
-        participation: rowValues[base + 1] || "-",
-        task: rowValues[base + 2] || "-",
-        commitment: rowValues[base + 3] || "-",
-        note: rowValues[base + 4] || ""
+        formative: row[base] || "-",
+        participation: row[base + 1] || "-",
+        task: row[base + 2] || "-",
+        commitment: row[base + 3] || "-",
+        note: row[base + 4] || ""
       };
     });
 
-    res.json({
+    students[studentId] = {
       student: { "الاسم": name, "الشعبة": className },
       subjects
-    });
+    };
+  });
 
-  } catch (err) {
-    console.error("❌ خطأ أثناء قراءة ملف Excel:", err);
-    res.status(500).json({ error: "❌ حدث خطأ أثناء قراءة الملف" });
-  }
+  console.log(`✅ تم تحميل ${Object.keys(students).length} طالب من الملف.`);
+  console.log("👀 أول 5 هويات:", Object.keys(students).slice(0, 5));
+
+  return students;
+}
+app.post("/api/reload-students", (req, res) => {
+  studentReports = loadStudentsFromExcel();
+  return res.json({ ok: true, count: Object.keys(studentReports).length });
 });
+
 
 // ===================== START SERVER =====================
 app.listen(PORT, () => {
