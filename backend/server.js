@@ -10,9 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
-// ✅ تصحيح المسار إلى مجلد public
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static("public"));
 
 // ===================== STAFF USERS =====================
 const STAFF_USERS = [
@@ -26,7 +24,7 @@ const studentMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
+  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
   { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "تقرير طالب", type: "page", path: "/report.html" },
   { title: "السياسات", type: "submenu", role: "student" },
@@ -41,18 +39,17 @@ const staffMenu = [
   { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
   { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
+  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
   { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "السياسات", type: "submenu", role: "staff" },
-  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn"},
+  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn" },
   { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
   { title: "روابط مهمة", type: "external", url: "https://sso.ese.gov.ae/" },
   { title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
-  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
+  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" }
 ];
 
-// ✅ إضافة section إلى مسار القائمة
-app.get("/api/menu/:role/:section", (req, res) => {
+app.get("/api/menu/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
   if (role === "staff") return res.json(staffMenu);
@@ -69,45 +66,36 @@ app.post("/api/login", (req, res) => {
 
 // ===================== STUDENT REPORT API =====================
 app.get("/api/report/:id", (req, res) => {
-  const studentId = req.params.id;
+  const { id } = req.params;
   const excelFile = path.join(__dirname, "data", "students.xlsx");
-  console.log("🔎 Looking for Excel file at:", excelFile);
-  console.log("🔍 الهوية المطلوبة:", studentId);
+
+  if (!fs.existsSync(excelFile)) {
+    return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
+  }
 
   const workbook = xlsx.readFile(excelFile);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const data = xlsx.utils.sheet_to_json(sheet, { defval: "" });
+  const rows = xlsx.utils.sheet_to_json(sheet);
 
-  // التحقق من وجود الطالب
-  const student = data.find(row => String(row["الهوية"]) === studentId);
+  const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
   if (!student) {
-    console.log("❌ الطالب غير موجود");
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
 
-  // المواد المثبتة
-  const subject_names = [
-    "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
-    "العلوم","الدراسات الاجتماعية","التصميم والتكنولوجيا",
-    "الأحياء","الفيزياء","الكيمياء"
-  ];
-
-  // بناء تقرير المواد
-  const subjects = subject_names.map(subject => {
-    return {
-      المادة: subject,
-      تكويني: student[`الاختبارات التكوينية_${subject}`] || student["الاختبارات التكوينية"] || "",
-      مشاركة: student[`المشاركة الصفية_${subject}`] || student["المشاركة الصفية"] || "",
-      مهمة: student[`انجاز المهام / مهمة الاداء_${subject}`] || student["انجاز المهام / مهمة الاداء"] || "",
-      التزام: student[`الحضور والالتزام_${subject}`] || student["الحضور والالتزام"] || "",
-    };
+  const subjects = [];
+  Object.keys(student).forEach(key => {
+    if (key.startsWith("مادة") || key.startsWith("الاختبارات") || key.startsWith("المشاركة") || key.startsWith("انجاز")) {
+      subjects.push({
+        name: key,
+        value: student[key] || "-"
+      });
+    }
   });
 
   res.json({
     student: {
-      الهوية: student["الهوية"],
-      الاسم: student["الاسم"],
-      الشعبة: student["الشعبة"] || "",
+      "الاسم": student["الاسم"],
+      "الشعبة": student["الشعبة"]
     },
     subjects
   });
