@@ -49,29 +49,11 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
-// ===================== MENU API =====================
-app.get("/api/menu/:role/:section", (req, res) => {
-  const { role, section } = req.params;
-
-  let menu;
-  if (role === "student") menu = JSON.parse(JSON.stringify(studentMenu));
-  else if (role === "staff") menu = JSON.parse(JSON.stringify(staffMenu));
-  else return res.status(400).send("❌ دور غير معروف");
-
-  // تعديل ملفات PDF حسب القسم
-  if (section === "male" || section === "female") {
-    menu.forEach(item => {
-      if (
-        item.type === "pdf" &&
-        ["cycle2.pdf", "cycle3.pdf", "timings.pdf", "teachers.pdf", "duties.pdf"].includes(item.filename)
-      ) {
-        const parts = item.filename.split(".");
-        item.filename = parts[0] + "g." + parts[1];
-      }
-    });
-  }
-
-  res.json(menu);
+app.get("/api/menu/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentMenu);
+  if (role === "staff") return res.json(staffMenu);
+  return res.status(400).send("❌ دور غير معروف");
 });
 
 // ===================== LOGIN =====================
@@ -82,16 +64,11 @@ app.post("/api/login", (req, res) => {
   return res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
 });
 
-// ===================== STUDENT REPORT =====================
+// ===================== STUDENT REPORT API =====================
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
-  const section = req.query.section || "male";
 
-  // تحديد ملف Excel حسب القسم
-  const excelFile =
-    section === "female"
-      ? path.join(__dirname, "data", "studentsg.xlsx")
-      : path.join(__dirname, "data", "students.xlsx");
+  const excelFile = path.join(__dirname, "data", "students.xlsx");
 
   if (!fs.existsSync(excelFile)) {
     return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
@@ -101,18 +78,11 @@ app.get("/api/report/:id", (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet);
 
-  // ✅ تحديد عمود الهوية الصحيح (يدعم أكثر من اسم)
-  const idColumn =
-    Object.keys(rows[0]).find(
-      key => key.includes("هوية") || key.toLowerCase().includes("id")
-    ) || "الهوية";
-
-  const student = rows.find(r => String(r[idColumn]).trim() === id.trim());
+  const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
   if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
 
-  // إعداد بيانات المواد
   const subjects = [];
   Object.keys(student).forEach(key => {
     if (key.startsWith("مادة")) {
