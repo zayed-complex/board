@@ -1,158 +1,267 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<style>
-/* ==================== أساسي ==================== */
-body {
-  font-family: "Tahoma", Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
-  background: #f4f6f8;
-}
-h1 {
-  margin-bottom: 20px;
-  color: #333;
-}
-
-/* ==================== أزرار موحدة ==================== */
-.button {
-  padding: 10px 18px;
-  font-size: 1em;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #fff;
-  transition: 0.2s;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 5px;
-}
-
-.btn-primary { background-color: #3498db; }
-.btn-primary:hover { background-color: #217dbb; }
-
-.btn-danger { background-color: #e74c3c; }
-.btn-danger:hover { background-color: #c0392b; }
-
-.btn-warning { background-color: #f39c12; }
-.btn-warning:hover { background-color: #d68910; }
-
-.btn-info { background-color: #16a085; }
-.btn-info:hover { background-color: #13876b; }
-
-/* ==================== حاويات الأزرار ==================== */
-#navControls, #pdfControls, #menuContainer {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
-  margin-bottom: 15px;
-}
-
-#navControls {
-  background: #fff;
-  padding: 15px 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-/* ==================== عرض ملفات PDF ==================== */
-#pdfContainer {
-  display: none;
-  width: 90%;
-  margin: 20px auto;
-  position: relative;
-}
-
-#pdfViewer {
-  width: 100%;
-  height: 600px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-/* ==================== استجابة للشاشات الصغيرة ==================== */
-@media (max-width: 768px) {
-  #pdfViewer { height: 80vh; }
-  #pdfControls, #menuContainer, #navControls {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .button { width: 90%; padding: 10px; font-size: 1em; }
-}
-</style>
   <meta charset="UTF-8">
-  <title>📋 لوحة التحكم</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎓 لوحة التحكم</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ========== الأساسيات ========== */
+    body {
+      font-family: "Tahoma", Arial, sans-serif;
+      text-align: center;
+      padding: 0;
+      background: #f4f6f8;
+    }
 
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-top img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 4px;
+    }
+
+    .school-name {
+      font-size: 18px;
+      color: #ecf0f1;
+    }
+
+    h1 {
+      margin: 15px 0;
+      color: #fff;
+    }
+
+    /* ========== أزرار موحدة ========== */
+    .button {
+      padding: 10px 18px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #fff;
+      transition: 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 5px;
+    }
+
+    .btn-primary { background-color: #3498db; }
+    .btn-primary:hover { background-color: #217dbb; }
+
+    .btn-danger { background-color: #e74c3c; }
+    .btn-danger:hover { background-color: #c0392b; }
+
+    .btn-warning { background-color: #f39c12; }
+    .btn-warning:hover { background-color: #d68910; }
+
+    .btn-info { background-color: #16a085; }
+    .btn-info:hover { background-color: #13876b; }
+
+    /* ========== الحاويات ========== */
+    #menuContainer, #navControls, #pdfControls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 15px auto;
+    }
+
+    #navControls {
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* ========== PDF Viewer ========== */
+    #pdfContainer {
+      display: none;
+      width: 90%;
+      margin: 20px auto;
+      position: relative;
+    }
+
+    #pdfViewer {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    /* ========== استجابة للشاشات الصغيرة ========== */
+    @media (max-width: 768px) {
+      #pdfViewer { height: 80vh; }
+      #menuContainer, #navControls, #pdfControls {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .button { width: 90%; }
+    }
+  </style>
 </head>
 <body>
-  <header class="header">
-    <img src="/icons/logo.png" alt="شعار المدرسة" width="70">
-    <h1>مجمع زايد التعليمي - الظيت</h1>
-  </header>
-<!-- ==================== أزرار الرجوع والإنهاء ==================== -->
-<div id="navControls">
-  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
-  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
-</div>
 
-  <div class="container">
-    <div id="menu" class="menu"></div>
+  <!-- 🔹 رأس الصفحة -->
+  <header>
+    <div class="header-top">
+      <img src="/icons/logo.png" alt="شعار المدرسة">
+      <div class="school-name">مجمع زايد التعليمي - الظيت</div>
+    </div>
+    <h1 id="pageTitle">🎓 لوحة التحكم</h1>
+  </header>
+
+  <!-- 🔹 قائمة الأزرار -->
+  <div id="menuContainer"></div>
+
+  <!-- 🔹 أزرار التنقل -->
+  <div id="navControls">
+    <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
+    <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
+  </div>
+
+  <!-- 🔹 عرض PDF -->
+  <div id="pdfContainer">
+    <div id="pdfControls">
+      <button class="button btn-primary" id="downloadBtn">⬇ تحميل PDF</button>
+      <button class="button btn-warning" id="printBtn">🖨️ طباعة PDF</button>
+      <button class="button btn-danger" id="closeBtn">❌ إغلاق الملف</button>
+    </div>
+    <iframe id="pdfViewer"></iframe>
   </div>
 
   <script>
+    // ==================== المتغيرات العامة ====================
+    const menuContainer = document.getElementById("menuContainer");
+    const pdfContainer = document.getElementById("pdfContainer");
+    const pdfViewer = document.getElementById("pdfViewer");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const printBtn = document.getElementById("printBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const pageTitle = document.getElementById("pageTitle");
+
+    // ==================== تحديد الدور والقسم ====================
     const params = new URLSearchParams(window.location.search);
     const role = params.get("role") || sessionStorage.getItem("role") || "student";
     const section = params.get("section") || sessionStorage.getItem("section") || "male";
     sessionStorage.setItem("role", role);
     sessionStorage.setItem("section", section);
 
-    async function loadMenu() {
-      const res = await fetch(`/api/menu/${role}/${section}`);
-      const items = await res.json();
-      const menuDiv = document.getElementById("menu");
-      menuDiv.innerHTML = "";
+    pageTitle.textContent = role === "staff"
+      ? "🎓 لوحة تحكم الكادر الإداري والتدريسي"
+      : "🎓 لوحة تحكم الطالب / ولي الأمر";
 
-      items.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "menu-item";
-        if (item.type === "pdf") {
-          div.innerHTML = `<a href="/pdf/${item.filename}" target="_blank">${item.title}</a>`;
-        } else if (item.type === "external") {
-          div.innerHTML = `<a href="${item.url}" target="_blank">${item.title}</a>`;
-        } else if (item.type === "page") {
-          div.innerHTML = `<a href="${item.path}?role=${role}&section=${section}">${item.title}</a>`;
-        } else if (item.type === "submenu") {
-          div.innerHTML = `<a href="/policies.html?role=${item.role}">${item.title}</a>`;
-        }
-        menuDiv.appendChild(div);
+    // ==================== تحميل القائمة ====================
+    const BASE_URL = window.location.origin.includes("localhost")
+      ? "http://localhost:3000"
+      : window.location.origin;
+
+    fetch(`${BASE_URL}/api/menu/${role}/${section}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(menuItems => renderMenu(menuItems))
+      .catch(err => {
+        console.error("خطأ في تحميل القائمة:", err);
+        menuContainer.innerHTML = "<p style='color:red;'>❌ تعذر تحميل القائمة من الخادم.</p>";
+      });
+
+    // ==================== عرض القائمة ====================
+    function renderMenu(menu) {
+      menuContainer.innerHTML = "";
+      menu.forEach(item => {
+        const btn = document.createElement("button");
+        btn.className = "button btn-primary";
+        btn.textContent = item.title;
+        btn.onclick = () => handleMenuClick(item);
+        menuContainer.appendChild(btn);
       });
     }
 
-    loadMenu();
-// ==================== أزرار الرجوع / الإنهاء ====================
-document.getElementById("backBtn").onclick = () => window.location.href = "./index.html";
+    // ==================== التعامل مع نقر الأزرار ====================
+    function handleMenuClick(item) {
+      pdfContainer.style.display = "none";
+      switch (item.type) {
+        case "pdf":
+          openPdf(item.filename);
+          break;
+        case "submenu":
+          window.location.href = `policies.html?role=${item.role || role}`;
+          break;
+        case "page":
+          window.location.href = `${item.path}?role=${role}&section=${section}`;
+          break;
+        case "external":
+          window.open(item.url, "_blank", "noopener,noreferrer");
+          break;
+      }
+    }
 
-document.getElementById("exitBtn").onclick = () => {
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    window.close();
-  } else {
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
-        <h2>👋 تم إنهاء الجلسة</h2>
-        <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
-        <button onclick="window.location.href='./index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
-          🔁 عودة للرئيسية
-        </button>
-      </div>
-    `;
-  }
-};
+    // ==================== فتح ملفات PDF ====================
+    function openPdf(filename) {
+      const pdfUrl = `${BASE_URL}/api/pdfs/${filename}`;
+      pdfViewer.src = `/pdfjs/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+      pdfContainer.style.display = "block";
+      pdfContainer.scrollIntoView({ behavior: "smooth" });
+
+      downloadBtn.onclick = () => window.open(`${BASE_URL}/api/pdfs/download/${filename}`, "_blank");
+
+      printBtn.onclick = () => {
+        const printFrame = document.createElement('iframe');
+        printFrame.style.display = 'none';
+        printFrame.src = pdfUrl;
+        document.body.appendChild(printFrame);
+        printFrame.onload = () => {
+          printFrame.contentWindow.focus();
+          printFrame.contentWindow.print();
+        };
+      };
+
+      closeBtn.onclick = () => {
+        pdfContainer.style.display = "none";
+        pdfViewer.src = "";
+      };
+    }
+
+    // ==================== أزرار الرجوع / الإنهاء ====================
+    document.getElementById("backBtn").onclick = () => window.location.href = "./index.html";
+
+    document.getElementById("exitBtn").onclick = () => {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        window.close();
+      } else {
+        document.body.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
+            <h2>👋 تم إنهاء الجلسة</h2>
+            <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
+            <button onclick="window.location.href='./index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
+              🔁 عودة للرئيسية
+            </button>
+          </div>
+        `;
+      }
+    };
   </script>
+
 </body>
 </html>
