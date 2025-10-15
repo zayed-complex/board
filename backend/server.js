@@ -1,4 +1,4 @@
-// backend/server.js
+// ===================== IMPORTS =====================
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -51,9 +51,12 @@ app.get("/api/menu/:role/:section", (req, res) => {
   // تعديل ملفات PDF حسب القسم (male/female)
   if (section === "male" || section === "female") {
     menu.forEach(item => {
-      if (item.type === "pdf" && ["cycle2.pdf","cycle3.pdf","timings.pdf","teachers.pdf","duties.pdf"].includes(item.filename)) {
-        const parts = item.filename.split("."); // اسم + امتداد
-        item.filename = parts[0] + "g." + parts[1]; // إضافة g قبل الامتداد
+      if (
+        item.type === "pdf" &&
+        ["cycle2.pdf", "cycle3.pdf", "timings.pdf", "teachers.pdf", "duties.pdf"].includes(item.filename)
+      ) {
+        const parts = item.filename.split(".");
+        item.filename = parts[0] + "g." + parts[1];
       }
     });
   }
@@ -67,6 +70,54 @@ app.post("/api/login", (req, res) => {
   const user = STAFF_USERS.find(u => u.username === username && u.password === password);
   if (user) return res.json({ success: true });
   return res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
+});
+
+// ===================== STUDENT REPORT API =====================
+app.get("/api/report/:id", (req, res) => {
+  const { id } = req.params;
+  const section = req.query.section || "male";
+
+  // تحديد ملف Excel حسب القسم
+  const excelFile =
+    section === "female"
+      ? path.join(__dirname, "data", "students_female.xlsx")
+      : path.join(__dirname, "data", "students_male.xlsx");
+
+  if (!fs.existsSync(excelFile)) {
+    return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
+  }
+
+  const workbook = xlsx.readFile(excelFile);
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = xlsx.utils.sheet_to_json(sheet);
+
+  const student = rows.find(r => String(r["الهوية"]) === id);
+  if (!student) {
+    return res.status(404).json({ error: "❌ الطالب غير موجود" });
+  }
+
+  // إعداد بيانات المواد
+  const subjects = [];
+  Object.keys(student).forEach(key => {
+    if (key.startsWith("مادة")) {
+      subjects.push({
+        name: student[key],
+        formative: student[`تكويني_${key}`] || "-",
+        participation: student[`مشاركة_${key}`] || "-",
+        task: student[`مهمة_${key}`] || "-",
+        commitment: student[`التزام_${key}`] || "-",
+        note: student[`ملاحظة_${key}`] || "-"
+      });
+    }
+  });
+
+  res.json({
+    student: {
+      "الاسم": student["الاسم"],
+      "الشعبة": student["الشعبة"]
+    },
+    subjects
+  });
 });
 
 // ===================== START SERVER =====================
