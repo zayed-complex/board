@@ -135,7 +135,8 @@ app.get("/api/report/:id", (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet);
 
-  const student = rows.find(r => String(r["رقم الهوية"]) === id);
+  // مطابقة أكثر مرونة
+  const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
   if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
@@ -154,6 +155,15 @@ app.get("/api/report/:id", (req, res) => {
       });
     }
   });
+
+  res.json({
+    student: {
+      "الاسم": student["الاسم"],
+      "الشعبة": student["الشعبة"]
+    },
+    subjects
+  });
+});
 
   res.json({
     student: {
