@@ -49,11 +49,29 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
-app.get("/api/menu/:role", (req, res) => {
-  const { role } = req.params;
-  if (role === "student") return res.json(studentMenu);
-  if (role === "staff") return res.json(staffMenu);
-  return res.status(400).send("❌ دور غير معروف");
+// ===================== MENU API (مع القسم) =====================
+app.get("/api/menu/:role/:section", (req, res) => {
+  const { role, section } = req.params;
+
+  let menu;
+  if (role === "student") menu = JSON.parse(JSON.stringify(studentMenu));
+  else if (role === "staff") menu = JSON.parse(JSON.stringify(staffMenu));
+  else return res.status(400).send("❌ دور غير معروف");
+
+  // تعديل ملفات PDF حسب القسم
+  if (section === "female" || section === "male") {
+    menu.forEach(item => {
+      if (
+        item.type === "pdf" &&
+        ["cycle2.pdf", "cycle3.pdf", "timings.pdf", "teachers.pdf", "duties.pdf"].includes(item.filename)
+      ) {
+        const parts = item.filename.split(".");
+        item.filename = `${parts[0]}g.${parts[1]}`;
+      }
+    });
+  }
+
+  res.json(menu);
 });
 
 // ===================== LOGIN =====================
@@ -78,7 +96,11 @@ app.get("/api/report/:id", (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet);
 
-  const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
+  // 🔍 دعم أكثر من اسم للعمود
+  const student = rows.find(r =>
+    String(r["الهوية"] || r["رقم الهوية"]).trim() === id.trim()
+  );
+
   if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
