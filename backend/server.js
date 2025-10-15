@@ -20,55 +20,73 @@ const STAFF_USERS = [
 ];
 
 // ===================== MENUS =====================
+
+// 🎓 قائمة الطلاب / أولياء الأمور
 const studentMenu = [
-  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
-  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
-  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
-  { title: "تقرير طالب", type: "page", path: "/report.html" },
-  { title: "السياسات", type: "submenu", role: "student" },
-  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
-  { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
-  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
+  { title: "📘 جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "📗 جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "⏰ التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "🗓️ الخطة الأسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
+  { title: "📞 أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
+  { title: "📄 تقرير طالب", type: "page", path: "/report.html" },
+  { title: "📑 السياسات", type: "submenu", role: "student" },
+  { title: "💻 منصة ألف", type: "external", url: "https://www.alefed.com" },
+  { title: "🏛️ وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
+  { title: "🎓 بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
 ];
 
+// 👨‍🏫 قائمة الكادر الإداري والتدريسي
 const staffMenu = [
-  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
-  { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
-  { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
-  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
-  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
-  { title: "السياسات", type: "submenu", role: "staff" },
-  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn"},
-  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
-  { title: "روابط مهمة", type: "external", url: "https://sso.ese.gov.ae/" },
-  { title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
-  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
+  { title: "📘 جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
+  { title: "📗 جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
+  { title: "👩‍🏫 جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
+  { title: "🧑‍💼 جداول المناوبة", type: "pdf", filename: "duties.pdf" },
+  { title: "⏰ التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
+  { title: "🗓️ الخطة الأسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
+  { title: "📞 أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
+  { title: "📑 السياسات", type: "submenu", role: "staff" },
+  { title: "🏫 الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn" },
+  { title: "💻 منصة ألف", type: "external", url: "https://www.alefed.com" },
+  { title: "🔗 روابط مهمة", type: "external", url: "https://sso.ese.gov.ae/" },
+  { title: "📚 منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
+  { title: "🕘 الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" }
 ];
 
-app.get("/api/menu/:role", (req, res) => {
-  const { role } = req.params;
+// ===================== API: MENU (WITH SECTION) =====================
+app.get("/api/menu/:role/:section", (req, res) => {
+  const { role, section } = req.params;
+
+  // ✳️ نستخدم section لتخصيص القوائم في المستقبل (حاليًا لا تغيير)
+  console.log(`📋 Loading menu for role=${role}, section=${section}`);
+
   if (role === "student") return res.json(studentMenu);
   if (role === "staff") return res.json(staffMenu);
-  return res.status(400).send("❌ دور غير معروف");
+
+  return res.status(400).json({ error: "❌ دور غير معروف" });
 });
 
 // ===================== LOGIN =====================
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
-  const user = STAFF_USERS.find(u => u.username === username && u.password === password);
+  const user = STAFF_USERS.find(
+    (u) => u.username === username && u.password === password
+  );
   if (user) return res.json({ success: true });
   return res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
 });
 
 // ===================== SUBJECT NAMES =====================
 const subject_names = [
-  "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
-  "العلوم","الدراسات الاجتماعية","التصميم والتكنولوجيا",
-  "الأحياء","الفيزياء","الكيمياء"
+  "اللغة العربية",
+  "اللغة الإنجليزية",
+  "التربية الإسلامية",
+  "الرياضيات",
+  "العلوم",
+  "الدراسات الاجتماعية",
+  "التصميم والتكنولوجيا",
+  "الأحياء",
+  "الفيزياء",
+  "الكيمياء"
 ];
 
 // ===================== LOAD STUDENTS FUNCTION =====================
