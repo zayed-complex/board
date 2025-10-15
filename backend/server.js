@@ -71,6 +71,7 @@ app.post("/api/login", (req, res) => {
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
 
+  // المسار الصحيح للملف
   const excelFile = path.join(__dirname, "data", "students.xlsx");
   console.log("🔎 Looking for Excel file at:", excelFile);
   console.log("🔍 الهوية المطلوبة:", id);
@@ -80,44 +81,55 @@ app.get("/api/report/:id", (req, res) => {
   }
 
   try {
+    // قراءة الملف وتحويله إلى JSON
     const workbook = xlsx.readFile(excelFile);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
 
-    // قراءة من الصف الثاني لأن الصف الأول يحتوي رؤوس الأعمدة
-    const rows = xlsx.utils.sheet_to_json(sheet, { range: 1 });
+    console.log("📊 عدد الصفوف:", rows.length);
 
-    console.log("📊 أول 5 سجلات من ملف Excel:");
-    rows.slice(0, 5).forEach(r => {
-      console.log(r["الهوية"], r["الاسم"]);
-    });
-
+    // البحث عن الطالب حسب الهوية
     const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
     if (!student) {
       return res.status(404).json({ error: "❌ الطالب غير موجود" });
     }
 
-    // ===== استخراج المواد =====
-    // المواد موجودة بعد الأعمدة الأساسية (الهوية - الاسم - الشعبة)
-    const subjects = [];
-    const keys = Object.keys(student);
+    // ✅ أسماء المواد ثابتة
+    const subject_names = [
+      "اللغة العربية", "اللغة الإنجليزية", "التربية الإسلامية", "الرياضيات",
+      "العلوم", "الدراسات الاجتماعية", "التصميم والتكنولوجيا",
+      "الأحياء", "الفيزياء", "الكيمياء"
+    ];
 
-    // نقوم بقراءة المواد بمجموعات (5 أعمدة لكل مادة)
-    // "الاختبارات التكوينية" - "المشاركة الصفية" - "انجاز المهام / مهمة الاداء" - "الحضور والالتزام" - "الملاحظات"
-    for (let i = 3; i < keys.length; i += 5) {
-      const subjectName = keys[i].split("الاختبارات")[0].trim();
-      if (!subjectName) continue;
+    // ✅ إنشاء قائمة المواد من الأعمدة (كل مادة لها 5 أعمدة تقييم)
+    const subjects = [];
+    let startIndex = Object.keys(student).indexOf("الاختبارات التكوينية");
+
+    if (startIndex === -1) {
+      // fallback للبحث عن أي عمود مشابه
+      startIndex = Object.keys(student).findIndex(k => k.includes("الاختبارات التكوينية"));
+    }
+
+    if (startIndex === -1) {
+      return res.status(400).json({ error: "❌ لم يتم العثور على أعمدة المواد في الملف" });
+    }
+
+    // الآن نقرأ 5 أعمدة لكل مادة
+    for (let i = 0; i < subject_names.length; i++) {
+      const baseIndex = startIndex + (i * 5);
+      const keys = Object.keys(student);
 
       subjects.push({
-        name: subjectName,
-        formative: student[keys[i]],
-        participation: student[keys[i + 1]],
-        task: student[keys[i + 2]],
-        commitment: student[keys[i + 3]],
-        note: student[keys[i + 4]]
+        name: subject_names[i],
+        formative: student[keys[baseIndex]] || "-",
+        participation: student[keys[baseIndex + 1]] || "-",
+        task: student[keys[baseIndex + 2]] || "-",
+        commitment: student[keys[baseIndex + 3]] || "-",
+        note: student[keys[baseIndex + 4]] || "-"
       });
     }
 
-    // ===== إرسال النتيجة =====
+    // ✅ إرسال النتيجة
     res.json({
       student: {
         "الاسم": student["الاسم"],
