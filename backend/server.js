@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ===================== STAFF USERS =====================
+// ===================== USERS =====================
 const STAFF_USERS = [
   { username: "admin", password: "1234" },
   { username: "Admin", password: "1234" },
@@ -49,7 +49,7 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
-app.get("/api/menu/:role/:section?", (req, res) => {
+app.get("/api/menu/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
   if (role === "staff") return res.json(staffMenu);
@@ -64,18 +64,15 @@ app.post("/api/login", (req, res) => {
   return res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
 });
 
-// ===================== STUDENT REPORT API =====================
-app.get("/api/report/:id", (req, res) => {
-  const { id } = req.params;
+// ===================== SUBJECT NAMES =====================
+const subject_names = [
+  "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
+  "العلوم","الدراسات الاجتماعية","التصميم والتكنولوجيا",
+  "الأحياء","الفيزياء","الكيمياء"
+];
 
-  const excelFile = path.join(__dirname, "data", "students.xlsx");
-  const subject_names = [
-    "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
-    "العلوم","الدراسات الاجتماعية","التصميم والتكنولوجيا",
-    "الأحياء","الفيزياء","الكيمياء"
-  ];
-
-  function loadStudentsFromExcel() {
+// ===================== LOAD STUDENTS FUNCTION =====================
+function loadStudentsFromExcel() {
   const EXCEL_PATH = path.join(__dirname, "data", "students.xlsx");
 
   if (!fs.existsSync(EXCEL_PATH)) {
@@ -84,23 +81,20 @@ app.get("/api/report/:id", (req, res) => {
   }
 
   const workbook = xlsx.readFile(EXCEL_PATH, { cellText: false, cellDates: false });
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: "-" });
 
   const students = {};
-  const dataRows = rows.slice(1); // الصف الأول رؤوس الأعمدة فقط
+  const dataRows = rows.slice(1);
 
-  dataRows.forEach((row, index) => {
-    let studentId = row[0]; // ✅ الهوية في العمود الأول دائمًا
+  dataRows.forEach((row) => {
+    let studentId = row[0];
     if (!studentId || studentId === "-") return;
-
-    // تنظيف وتحويل الهوية إلى نص فقط
     studentId = String(studentId).replace(/[^\d]/g, "").trim();
     if (!studentId) return;
 
-    const name = row[1] ? String(row[1]).trim() : "-";       // العمود 2: الاسم
-    const className = row[2] ? String(row[2]).trim() : "-";  // العمود 3: الشعبة ✅
+    const name = row[1] ? String(row[1]).trim() : "-";
+    const className = row[2] ? String(row[2]).trim() : "-";
 
     const subjects = subject_names.map((sub, i) => {
       const base = 3 + i * 5; // من العمود الرابع تبدأ المواد
@@ -122,14 +116,24 @@ app.get("/api/report/:id", (req, res) => {
 
   console.log(`✅ تم تحميل ${Object.keys(students).length} طالب من الملف.`);
   console.log("👀 أول 5 هويات:", Object.keys(students).slice(0, 5));
-
   return students;
 }
-app.post("/api/reload-students", (req, res) => {
-  studentReports = loadStudentsFromExcel();
-  return res.json({ ok: true, count: Object.keys(studentReports).length });
-});
 
+// ===================== LOAD DATA ON START =====================
+let studentReports = loadStudentsFromExcel();
+
+// ===================== API: GET REPORT =====================
+app.get("/api/report/:id", (req, res) => {
+  const id = String(req.params.id).trim();
+  console.log("🔍 الهوية المطلوبة:", id);
+
+  const student = studentReports[id];
+  if (!student) {
+    return res.status(404).json({ error: "❌ الطالب غير موجود" });
+  }
+
+  res.json(student);
+});
 
 // ===================== START SERVER =====================
 app.listen(PORT, () => {
