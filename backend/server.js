@@ -52,6 +52,44 @@ const staffMenu = [
   { title: "🕘 الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" }
 ];
 
+// ===================== POLICIES =====================
+const studentPolicies = [
+  { title: "📘 اللائحة السلوكية", icon: "fa-user-shield", filename: "behavior_policy.pdf" },
+  { title: "🧾 سياسة التقييم", icon: "fa-clipboard-check", filename: "assessment_policy.pdf" },
+  { title: "🚪 سياسة المغادرة", icon: "fa-door-open", filename: "leave_policy.pdf" },
+  { title: "💻 سياسة الأمن الرقمي", icon: "fa-shield-alt", filename: "digital_safety_policy.pdf" },
+  { title: "👶 سياسة حقوق الطفل", icon: "fa-child", filename: "child_rights_policy.pdf" },
+  { title: "⏰ سياسة الحضور والغياب", icon: "fa-calendar-check", filename: "attendance_policy.pdf" }
+];
+
+const staffPolicies = [
+  { title: "📘 اللائحة السلوكية", icon: "fa-user-tie", filename: "behavior_policy.pdf" },
+  { title: "🧾 سياسة التقييم", icon: "fa-tasks", filename: "assessment_policy.pdf" },
+  { title: "🚪 سياسة المغادرة", icon: "fa-sign-out-alt", filename: "leave_policy.pdf" },
+  { title: "💻 سياسة الأمن الرقمي", icon: "fa-lock", filename: "digital_safety_policy.pdf" },
+  { title: "👶 سياسة حقوق الطفل", icon: "fa-child", filename: "child_rights_policy.pdf" },
+  { title: "⏰ سياسة الحضور والانصراف", icon: "fa-business-time", filename: "attendance_policy.pdf" },
+  { title: "📊 إطار معايير الرقابة والتقييم المدرسية", icon: "fa-chart-line", filename: "framework.pdf" },
+  { title: "⚖️ السياسات المهنية والأخلاقية", icon: "fa-balance-scale", filename: "ethics_charter_policy.pdf" }
+];
+
+app.get("/api/policies/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentPolicies);
+  if (role === "staff") return res.json(staffPolicies);
+  return res.status(400).json({ error: "❌ دور غير معروف" });
+});
+
+
+app.get("/api/policies/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentPolicies);
+  if (role === "staff") return res.json(staffPolicies);
+  return res.status(400).send("❌ دور غير معروف");
+});
+
+
+
 // ===================== API: MENU (WITH SECTION) =====================
 app.get("/api/menu/:role/:section", (req, res) => {
   const { role, section } = req.params;
@@ -63,6 +101,24 @@ app.get("/api/menu/:role/:section", (req, res) => {
   if (role === "staff") return res.json(staffMenu);
 
   return res.status(400).json({ error: "❌ دور غير معروف" });
+});
+
+// ===================== POLICIES API =====================
+app.get("/api/policies/:role", (req, res) => {
+  const { role } = req.params;
+  const policyPath = path.join(__dirname, "data", `policies-${role}.json`);
+
+  if (!fs.existsSync(policyPath)) {
+    return res.status(404).json({ error: "❌ لم يتم العثور على ملف السياسات لهذا الدور" });
+  }
+
+  try {
+    const data = JSON.parse(fs.readFileSync(policyPath, "utf8"));
+    res.json(data);
+  } catch (err) {
+    console.error("خطأ في قراءة ملف السياسات:", err);
+    res.status(500).json({ error: "❌ خطأ في قراءة ملف السياسات" });
+  }
 });
 
 // ===================== LOGIN =====================
