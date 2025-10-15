@@ -216,6 +216,22 @@
         errorDiv.textContent = "❌ حدث خطأ أثناء تحميل التقرير.";
       }
     }
+document.getElementById("exitBtn").onclick = () => {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    window.close();
+  } else {
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
+        <h2>👋 تم إنهاء الجلسة</h2>
+        <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
+        <button onclick="window.location.href='/index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
+          🔁 عودة للرئيسية
+        </button>
+      </div>
+    `;
+  }
+};
+
   </script>
 </body>
 </html>
