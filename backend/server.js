@@ -69,79 +69,48 @@ app.post("/api/login", (req, res) => {
 
 // ===================== STUDENT REPORT API =====================
 app.get("/api/report/:id", (req, res) => {
-  const { id } = req.params;
-
-  // المسار الصحيح للملف
+  const studentId = req.params.id;
   const excelFile = path.join(__dirname, "data", "students.xlsx");
   console.log("🔎 Looking for Excel file at:", excelFile);
-  console.log("🔍 الهوية المطلوبة:", id);
+  console.log("🔍 الهوية المطلوبة:", studentId);
 
-  if (!fs.existsSync(excelFile)) {
-    return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
+  const workbook = xlsx.readFile(excelFile);
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const data = xlsx.utils.sheet_to_json(sheet, { defval: "" });
+
+  // التحقق من وجود الطالب
+  const student = data.find(row => String(row["الهوية"]) === studentId);
+  if (!student) {
+    console.log("❌ الطالب غير موجود");
+    return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
 
-  try {
-    // قراءة الملف وتحويله إلى JSON
-    const workbook = xlsx.readFile(excelFile);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
+  // المواد المثبتة
+  const subject_names = [
+    "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
+    "العلوم","الدراسات الاجتماعية","التصميم والتكنولوجيا",
+    "الأحياء","الفيزياء","الكيمياء"
+  ];
 
-    console.log("📊 عدد الصفوف:", rows.length);
+  // بناء تقرير المواد
+  const subjects = subject_names.map(subject => {
+    return {
+      المادة: subject,
+      تكويني: student[`الاختبارات التكوينية_${subject}`] || student["الاختبارات التكوينية"] || "",
+      مشاركة: student[`المشاركة الصفية_${subject}`] || student["المشاركة الصفية"] || "",
+      مهمة: student[`انجاز المهام / مهمة الاداء_${subject}`] || student["انجاز المهام / مهمة الاداء"] || "",
+      التزام: student[`الحضور والالتزام_${subject}`] || student["الحضور والالتزام"] || "",
+    };
+  });
 
-    // البحث عن الطالب حسب الهوية
-    const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
-    if (!student) {
-      return res.status(404).json({ error: "❌ الطالب غير موجود" });
-    }
-
-    // ✅ أسماء المواد ثابتة
-    const subject_names = [
-      "اللغة العربية", "اللغة الإنجليزية", "التربية الإسلامية", "الرياضيات",
-      "العلوم", "الدراسات الاجتماعية", "التصميم والتكنولوجيا",
-      "الأحياء", "الفيزياء", "الكيمياء"
-    ];
-
-    // ✅ إنشاء قائمة المواد من الأعمدة (كل مادة لها 5 أعمدة تقييم)
-    const subjects = [];
-    let startIndex = Object.keys(student).indexOf("الاختبارات التكوينية");
-
-    if (startIndex === -1) {
-      // fallback للبحث عن أي عمود مشابه
-      startIndex = Object.keys(student).findIndex(k => k.includes("الاختبارات التكوينية"));
-    }
-
-    if (startIndex === -1) {
-      return res.status(400).json({ error: "❌ لم يتم العثور على أعمدة المواد في الملف" });
-    }
-
-    // الآن نقرأ 5 أعمدة لكل مادة
-    for (let i = 0; i < subject_names.length; i++) {
-      const baseIndex = startIndex + (i * 5);
-      const keys = Object.keys(student);
-
-      subjects.push({
-        name: subject_names[i],
-        formative: student[keys[baseIndex]] || "-",
-        participation: student[keys[baseIndex + 1]] || "-",
-        task: student[keys[baseIndex + 2]] || "-",
-        commitment: student[keys[baseIndex + 3]] || "-",
-        note: student[keys[baseIndex + 4]] || "-"
-      });
-    }
-
-    // ✅ إرسال النتيجة
-    res.json({
-      student: {
-        "الاسم": student["الاسم"],
-        "الشعبة": student["الشعبة"]
-      },
-      subjects
-    });
-
-  } catch (err) {
-    console.error("❌ خطأ أثناء قراءة ملف Excel:", err);
-    res.status(500).json({ error: "❌ حدث خطأ أثناء قراءة الملف" });
-  }
+  res.json({
+    student: {
+      الهوية: student["الهوية"],
+      الاسم: student["الاسم"],
+      الشعبة: student["الشعبة"] || "",
+    },
+    subjects
+  });
 });
 
 // ===================== START SERVER =====================
