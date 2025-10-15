@@ -10,8 +10,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
-// ✅ تصحيح المسار إلى مجلد public
 app.use(express.static(path.join(__dirname, "../public")));
 
 // ===================== STAFF USERS =====================
@@ -51,8 +49,7 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
-// ✅ إضافة section إلى مسار القائمة
-app.get("/api/menu/:role/:section", (req, res) => {
+app.get("/api/menu/:role/:section?", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
   if (role === "staff") return res.json(staffMenu);
@@ -72,6 +69,12 @@ app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
 
   const excelFile = path.join(__dirname, "data", "students.xlsx");
+  const subject_names = [
+    "اللغة العربية","اللغة الإنجليزية","التربية الإسلامية","الرياضيات",
+    "العلوم","الدراسات الاجتماعية","التصميم والتكنولوجيا",
+    "الأحياء","الفيزياء","الكيمياء"
+  ];
+
   console.log("🔎 Looking for Excel file at:", excelFile);
   console.log("🔍 الهوية المطلوبة:", id);
 
@@ -82,47 +85,41 @@ app.get("/api/report/:id", (req, res) => {
   try {
     const workbook = xlsx.readFile(excelFile);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
 
-    // قراءة من الصف الثاني لأن الصف الأول يحتوي رؤوس الأعمدة
-    const rows = xlsx.utils.sheet_to_json(sheet, { range: 1 });
+    console.log("📊 عدد الصفوف:", rows.length);
 
-    console.log("📊 أول 5 سجلات من ملف Excel:");
-    rows.slice(0, 5).forEach(r => {
-      console.log(r["الهوية"], r["الاسم"]);
+    const student = rows.find(r => {
+      const key = Object.keys(r).find(k => k.trim().includes("الهوية"));
+      return key && String(r[key]).trim() === id.trim();
     });
 
-    const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
     if (!student) {
       return res.status(404).json({ error: "❌ الطالب غير موجود" });
     }
 
-    // ===== استخراج المواد =====
-    // المواد موجودة بعد الأعمدة الأساسية (الهوية - الاسم - الشعبة)
-    const subjects = [];
+    // استخراج البيانات بناءً على الأعمدة الثابتة
     const keys = Object.keys(student);
+    const rowValues = Object.values(student);
 
-    // نقوم بقراءة المواد بمجموعات (5 أعمدة لكل مادة)
-    // "الاختبارات التكوينية" - "المشاركة الصفية" - "انجاز المهام / مهمة الاداء" - "الحضور والالتزام" - "الملاحظات"
-    for (let i = 3; i < keys.length; i += 5) {
-      const subjectName = keys[i].split("الاختبارات")[0].trim();
-      if (!subjectName) continue;
+    // الأعمدة الثلاثة الأولى هي (الهوية - الاسم - الشعبة)
+    const name = student["الاسم"] || rowValues[1];
+    const className = student["الشعبة"] || rowValues[2];
 
-      subjects.push({
-        name: subjectName,
-        formative: student[keys[i]],
-        participation: student[keys[i + 1]],
-        task: student[keys[i + 2]],
-        commitment: student[keys[i + 3]],
-        note: student[keys[i + 4]]
-      });
-    }
+    const subjects = subject_names.map((sub, i) => {
+      const base = 3 + i * 5; // نبدأ بعد الأعمدة الأساسية
+      return {
+        name: sub,
+        formative: rowValues[base] || "-",
+        participation: rowValues[base + 1] || "-",
+        task: rowValues[base + 2] || "-",
+        commitment: rowValues[base + 3] || "-",
+        note: rowValues[base + 4] || ""
+      };
+    });
 
-    // ===== إرسال النتيجة =====
     res.json({
-      student: {
-        "الاسم": student["الاسم"],
-        "الشعبة": student["الشعبة"]
-      },
+      student: { "الاسم": name, "الشعبة": className },
       subjects
     });
 
