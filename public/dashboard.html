@@ -1,153 +1,60 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎓 لوحة التحكم</title>
-<style>
-body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 20px; background: #f4f6f8; }
-h1 { margin-bottom: 20px; color: #333; }
-.button { padding: 10px 18px; font-size: 1em; border: none; border-radius: 8px; cursor: pointer; color: #fff; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin: 5px; }
-.btn-primary { background-color: #3498db; }
-.btn-primary:hover { background-color: #217dbb; }
-.btn-danger { background-color: #e74c3c; }
-.btn-danger:hover { background-color: #c0392b; }
-.btn-warning { background-color: #f39c12; }
-.btn-warning:hover { background-color: #d68910; }
-#navControls, #menuContainer { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
-#navControls { background: #fff; padding: 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; }
-#pdfContainer { display: none; width: 90%; margin: 20px auto; position: relative; }
-#pdfViewer { width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 8px; }
-#pdfControls { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
-@media (max-width: 768px) {
-  #pdfViewer { height: 80vh; }
-  #menuContainer, #navControls, #pdfControls { flex-direction: row; flex-wrap: wrap; gap: 8px; }
-  .button { width: 90%; padding: 10px; font-size: 1em; }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header>
+    <img src="logo.png" alt="شعار المدرسة" class="logo" />
+    <h1>لوحة التحكم</h1>
+  </header>
 
-<h1 id="pageTitle">🎓 لوحة التحكم</h1>
-<div id="menuContainer"></div>
+  <main id="menu"></main>
 
-<div id="navControls">
-  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
-  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
-</div>
+  <script>
+    // قراءة المتغيرات من الرابط أو من التخزين
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get("role") || sessionStorage.getItem("role") || "student";
+    const section = urlParams.get("section") || sessionStorage.getItem("section") || "male";
 
-<div id="pdfContainer">
-  <div id="pdfControls">
-    <button class="button btn-primary" id="downloadBtn">⬇ تحميل PDF</button>
-    <button class="button btn-warning" id="printBtn">🖨️ طباعة PDF</button>
-    <button class="button btn-danger" id="closeBtn">❌ إغلاق الملف</button>
-  </div>
-  <iframe id="pdfViewer"></iframe>
-</div>
+    // تخزين القيم للاستخدام لاحقًا
+    sessionStorage.setItem("role", role);
+    sessionStorage.setItem("section", section);
 
-<script>
-// ==================== المتغيرات ====================
-const menuContainer = document.getElementById("menuContainer");
-const pdfContainer = document.getElementById("pdfContainer");
-const pdfViewer = document.getElementById("pdfViewer");
-const downloadBtn = document.getElementById("downloadBtn");
-const printBtn = document.getElementById("printBtn");
-const closeBtn = document.getElementById("closeBtn");
-const pageTitle = document.getElementById("pageTitle");
+    // تحميل القائمة من السيرفر
+    async function loadMenu() {
+      const res = await fetch(`/api/menu/${role}/${section}`);
+      const items = await res.json();
 
-// ==================== جلب الدور والقسم ====================
-const role = sessionStorage.getItem("role") || "student";
-const section = sessionStorage.getItem("section-role") || "male";
+      const container = document.getElementById("menu");
+      container.innerHTML = "";
 
-// ==================== العنوان حسب الدور ====================
-pageTitle.textContent = role === "staff"
-  ? "🎓 لوحة تحكم الكادر الإداري والتدريسي"
-  : "🎓 لوحة تحكم الطالب / ولي الأمر";
+      items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "menu-item";
+        div.textContent = item.title;
 
-// ==================== القوائم ====================
-const studentMenu = [
-  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
-  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
-  { title: "تقرير طالب", type: "page", path: "/report.html" },
-  { title: "السياسات", type: "submenu", role: "student" },
-];
+        div.addEventListener("click", () => {
+          if (item.type === "pdf") {
+            window.open(`/${item.filename}`, "_blank");
+          } else if (item.type === "external") {
+            window.open(item.url, "_blank");
+          } else if (item.type === "page") {
+            // ✅ هنا التعديل المهم: نمرر role وsection للرابط
+            window.location.href = `${item.path}?role=${role}&section=${section}`;
+          } else if (item.type === "submenu") {
+            window.location.href = `/policies.html?role=${role}`;
+          }
+        });
 
-const staffMenu = [
-  { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
-  { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
-  { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
-  { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
-  { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
-  { title: "السياسات", type: "submenu", role: "staff" },
-];
+        container.appendChild(div);
+      });
+    }
 
-const menuItems = role === "staff" ? staffMenu : studentMenu;
-
-// ==================== تعديل أسماء الملفات حسب القسم ====================
-menuItems.forEach(item => {
-  if (section === "female" && item.filename && item.filename.endsWith(".pdf")) {
-    // إضافة حرف g للملفات النسائية
-    const parts = item.filename.split(".pdf");
-    item.filename = parts[0] + "g.pdf";
-  }
-});
-
-// ==================== عرض القائمة ====================
-function renderMenu(menu) {
-  menuContainer.innerHTML = "";
-  menu.forEach(item => {
-    const btn = document.createElement("button");
-    btn.className = "button btn-primary";
-    btn.textContent = item.title;
-    btn.onclick = () => handleMenuClick(item);
-    menuContainer.appendChild(btn);
-  });
-}
-
-function handleMenuClick(item) {
-  pdfContainer.style.display = "none";
-  switch (item.type) {
-    case "pdf":
-      openPdf(item.filename);
-      break;
-    case "submenu":
-      alert("فتح السياسات"); // يمكن ربطها بالصفحة الحقيقية
-      break;
-    case "page":
-      window.location.href = item.path;
-      break;
-  }
-}
-
-function openPdf(filename) {
-  const downloadUrl = `./pdfs/${filename}`;
-  pdfViewer.src = `./pdfs/${filename}`;
-  pdfContainer.style.display = "block";
-  pdfContainer.scrollIntoView({ behavior: "smooth" });
-
-  downloadBtn.onclick = () => window.open(downloadUrl, "_blank");
-  printBtn.onclick = () => {
-    const printFrame = document.createElement('iframe');
-    printFrame.style.display = 'none';
-    printFrame.src = downloadUrl;
-    document.body.appendChild(printFrame);
-    printFrame.contentWindow.focus();
-    printFrame.contentWindow.print();
-  };
-  closeBtn.onclick = () => {
-    pdfContainer.style.display = "none";
-    pdfViewer.src = "";
-  };
-}
-
-// ==================== أزرار الرجوع / الإنهاء ====================
-document.getElementById("backBtn").onclick = () => window.location.href = "./index.html";
-document.getElementById("exitBtn").onclick = () => document.body.innerHTML = `<h2>👋 تم إنهاء الجلسة</h2>`;
-renderMenu(menuItems);
-</script>
-
+    loadMenu();
+  </script>
 </body>
 </html>
