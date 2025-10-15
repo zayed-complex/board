@@ -4,6 +4,124 @@
   <meta charset="UTF-8">
   <title id="pageTitle">📑 تقرير الطالب</title>
   <link rel="stylesheet" href="css/style.css">
+<style>
+    body {
+      font-family: "Tahoma", Arial, sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: #2c3e50;
+      color: #fff;
+      padding: 15px;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .header-top img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 4px;
+    }
+    .school-name {
+      font-size: 18px;
+      color: #ecf0f1;
+      margin: 0;
+    }
+    .container {
+      margin: 30px auto;
+      max-width: 900px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .search-box {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 8px;
+      font-size: 16px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 9px 15px;
+      font-size: 16px;
+      background: #2980b9;
+      border: none;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #3498db;
+    }
+    .student-info {
+      margin: 15px 0;
+      font-size: 18px;
+      color: #2c3e50;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    table th {
+      background: #34495e;
+      color: #fff;
+    }
+    .error {
+      color: red;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #printBtn {
+      display: none; /* يظهر فقط عند تحميل تقرير */
+      background: #27ae60;
+    }
+    #printBtn:hover {
+      background: #2ecc71;
+    }
+    .notes-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fdf6e3;
+      border: 1px solid #eed;
+      border-radius: 8px;
+      text-align: right;
+    }
+    .notes-box h3 {
+      margin-top: 0;
+      color: #b58900;
+    }
+  </style>
+</head>
+<!-- ==================== أزرار الرجوع والإنهاء ==================== -->
+<div id="navControls">
+  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
+  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
+</div>
 </head>
 <body>
   <header id="reportHeader">📑 تقرير الطالب</header>
