@@ -1,52 +1,56 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>📋 لوحة التحكم</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="header">
-    <img src="/icons/logo.png" alt="شعار المدرسة" width="70">
-    <h1>مجمع زايد التعليمي - الظيت</h1>
+  <header>
+    <img src="logo.png" alt="شعار المدرسة" class="logo" />
+    <h1>لوحة التحكم</h1>
   </header>
 
-  <div class="container">
-    <div id="menu" class="menu"></div>
-  </div>
+  <main id="menu"></main>
 
   <script>
-    // قراءة role و section من الرابط أو التخزين المؤقت
-    const params = new URLSearchParams(window.location.search);
-    const role = params.get("role") || sessionStorage.getItem("role") || "student";
-    const section = params.get("section") || sessionStorage.getItem("section") || "male";
+    // قراءة المتغيرات من الرابط أو من التخزين
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get("role") || sessionStorage.getItem("role") || "student";
+    const section = urlParams.get("section") || sessionStorage.getItem("section") || "male";
 
+    // تخزين القيم للاستخدام لاحقًا
     sessionStorage.setItem("role", role);
     sessionStorage.setItem("section", section);
 
-    // تحميل القائمة
+    // تحميل القائمة من السيرفر
     async function loadMenu() {
       const res = await fetch(`/api/menu/${role}/${section}`);
       const items = await res.json();
-      const menuDiv = document.getElementById("menu");
-      menuDiv.innerHTML = "";
+
+      const container = document.getElementById("menu");
+      container.innerHTML = "";
 
       items.forEach(item => {
         const div = document.createElement("div");
         div.className = "menu-item";
+        div.textContent = item.title;
 
-        if (item.type === "pdf") {
-          div.innerHTML = `<a href="/pdf/${item.filename}" target="_blank">${item.title}</a>`;
-        } else if (item.type === "external") {
-          div.innerHTML = `<a href="${item.url}" target="_blank">${item.title}</a>`;
-        } else if (item.type === "page") {
-          // ✅ تمرير role و section إلى report.html
-          div.innerHTML = `<a href="${item.path}?role=${role}&section=${section}">${item.title}</a>`;
-        } else if (item.type === "submenu") {
-          div.innerHTML = `<a href="/policies.html?role=${item.role}">${item.title}</a>`;
-        }
+        div.addEventListener("click", () => {
+          if (item.type === "pdf") {
+            window.open(`/${item.filename}`, "_blank");
+          } else if (item.type === "external") {
+            window.open(item.url, "_blank");
+          } else if (item.type === "page") {
+            // ✅ هنا التعديل المهم: نمرر role وsection للرابط
+            window.location.href = `${item.path}?role=${role}&section=${section}`;
+          } else if (item.type === "submenu") {
+            window.location.href = `/policies.html?role=${role}`;
+          }
+        });
 
-        menuDiv.appendChild(div);
+        container.appendChild(div);
       });
     }
 
