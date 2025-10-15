@@ -72,7 +72,8 @@ app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
 
   // ✅ تصحيح المسار إلى ملف Excel
-  const excelFile = path.join(__dirname, "../data/students.xlsx");
+   const excelFile = path.join(__dirname, "./data/students.xlsx");
+
   console.log("🔎 Looking for Excel file at:", excelFile);
 
   if (!fs.existsSync(excelFile)) {
