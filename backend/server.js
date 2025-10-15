@@ -67,40 +67,69 @@ app.post("/api/login", (req, res) => {
 // ===================== STUDENT REPORT API =====================
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
+
+  // المسار الصحيح للملف
   const excelFile = path.join(__dirname, "data", "students.xlsx");
+  console.log("🔎 Looking for Excel file at:", excelFile);
+  console.log("🔍 الهوية المطلوبة:", id);
 
   if (!fs.existsSync(excelFile)) {
     return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
   }
 
-  const workbook = xlsx.readFile(excelFile);
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = xlsx.utils.sheet_to_json(sheet);
+  try {
+    // قراءة الملف وتحويله إلى JSON
+    const workbook = xlsx.readFile(excelFile);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
 
-  const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
-  if (!student) {
-    return res.status(404).json({ error: "❌ الطالب غير موجود" });
-  }
+    console.log("📊 عدد الصفوف:", rows.length);
 
-  const subjects = [];
-  Object.keys(student).forEach(key => {
-    if (key.startsWith("مادة") || key.startsWith("الاختبارات") || key.startsWith("المشاركة") || key.startsWith("انجاز")) {
+    // البحث عن الطالب حسب الهوية
+    const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
+
+    if (!student) {
+      return res.status(404).json({ error: "❌ الطالب غير موجود" });
+    }
+
+    // إعداد المواد
+    const subjects = [];
+    // نلتقط أسماء المواد من الأعمدة التي تبدأ بكلمة "الاختبارات التكوينية" مثلاً
+    const headers = Object.keys(student);
+
+    for (let i = 3; i < headers.length; i += 5) {
+      const subjectName = headers[i - 3]
+        ?.replace("الاختبارات التكوينية", "")
+        .replace("المشاركة الصفية", "")
+        .replace("انجاز المهام / مهمة الاداء", "")
+        .replace("الحضور والالتزام", "")
+        .replace("الملاحظات", "")
+        .trim() || `مادة ${(i - 2) / 5}`;
+
       subjects.push({
-        name: key,
-        value: student[key] || "-"
+        name: subjectName || `مادة ${(i - 2) / 5}`,
+        formative: student[headers[i]] || "-",
+        participation: student[headers[i + 1]] || "-",
+        task: student[headers[i + 2]] || "-",
+        commitment: student[headers[i + 3]] || "-",
+        note: student[headers[i + 4]] || "-"
       });
     }
-  });
 
-  res.json({
-    student: {
-      "الاسم": student["الاسم"],
-      "الشعبة": student["الشعبة"]
-    },
-    subjects
-  });
+    // إعادة النتيجة
+    res.json({
+      student: {
+        "الاسم": student["الاسم"],
+        "الشعبة": student["الشعبة"]
+      },
+      subjects
+    });
+
+  } catch (err) {
+    console.error("❌ خطأ أثناء قراءة ملف Excel:", err);
+    res.status(500).json({ error: "❌ حدث خطأ أثناء قراءة الملف" });
+  }
 });
-
 // ===================== START SERVER =====================
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
