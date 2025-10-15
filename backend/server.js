@@ -49,43 +49,7 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
-// ===================== MENU API (أساسي) =====================
-app.get("/api/menu/:role", (req, res) => {
-  const { role } = req.params;
-  if (role === "student") return res.json(studentMenu);
-  if (role === "staff") return res.json(staffMenu);
-  return res.status(400).send("❌ دور غير معروف");
-});
-
-// ===================== POLICIES =====================
-const studentPolicies = [
-  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
-  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
-  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
-  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
-  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
-  { title: "سياسة الحضور والغياب", filename: "attendance_policy.pdf" }
-];
-
-const staffPolicies = [
-  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
-  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
-  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
-  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
-  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
-  { title: "سياسة الحضور والانصراف", filename: "attendance_policy.pdf" },
-  { title: "إطار معايير الرقابة والتقييم المدرسية", filename: "framework.pdf" },
-  { title: "السياسات المهنية والأخلاقية", filename: "ethics_charter_policy.pdf" }
-];
-
-app.get("/api/policies/:role", (req, res) => {
-  const { role } = req.params;
-  if (role === "student") return res.json(studentPolicies);
-  if (role === "staff") return res.json(staffPolicies);
-  return res.status(400).send("❌ دور غير معروف");
-});
-
-// ===================== MENU API (مع القسم) =====================
+// ===================== MENU API =====================
 app.get("/api/menu/:role/:section", (req, res) => {
   const { role, section } = req.params;
 
@@ -94,7 +58,7 @@ app.get("/api/menu/:role/:section", (req, res) => {
   else if (role === "staff") menu = JSON.parse(JSON.stringify(staffMenu));
   else return res.status(400).send("❌ دور غير معروف");
 
-  // تعديل ملفات PDF حسب القسم (male/female)
+  // تعديل ملفات PDF حسب القسم
   if (section === "male" || section === "female") {
     menu.forEach(item => {
       if (
@@ -118,7 +82,7 @@ app.post("/api/login", (req, res) => {
   return res.json({ success: false, message: "اسم المستخدم أو كلمة المرور خاطئة" });
 });
 
-// ===================== STUDENT REPORT API =====================
+// ===================== STUDENT REPORT =====================
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
   const section = req.query.section || "male";
@@ -137,8 +101,13 @@ app.get("/api/report/:id", (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet);
 
-  // مطابقة الهوية
-  const student = rows.find(r => String(r["رقم الهوية"]).trim() === id.trim());
+  // ✅ تحديد عمود الهوية الصحيح (يدعم أكثر من اسم)
+  const idColumn =
+    Object.keys(rows[0]).find(
+      key => key.includes("هوية") || key.toLowerCase().includes("id")
+    ) || "الهوية";
+
+  const student = rows.find(r => String(r[idColumn]).trim() === id.trim());
   if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
