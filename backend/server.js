@@ -49,29 +49,12 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
-// ===================== MENU API (مع القسم) =====================
-app.get("/api/menu/:role/:section", (req, res) => {
-  const { role, section } = req.params;
-
-  let menu;
-  if (role === "student") menu = JSON.parse(JSON.stringify(studentMenu));
-  else if (role === "staff") menu = JSON.parse(JSON.stringify(staffMenu));
-  else return res.status(400).send("❌ دور غير معروف");
-
-  // تعديل ملفات PDF حسب القسم
-  if (section === "female" || section === "male") {
-    menu.forEach(item => {
-      if (
-        item.type === "pdf" &&
-        ["cycle2.pdf", "cycle3.pdf", "timings.pdf", "teachers.pdf", "duties.pdf"].includes(item.filename)
-      ) {
-        const parts = item.filename.split(".");
-        item.filename = `${parts[0]}g.${parts[1]}`;
-      }
-    });
-  }
-
-  res.json(menu);
+// ===================== MENU API =====================
+app.get("/api/menu/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentMenu);
+  if (role === "staff") return res.json(staffMenu);
+  return res.status(400).send("❌ دور غير معروف");
 });
 
 // ===================== LOGIN =====================
@@ -85,7 +68,6 @@ app.post("/api/login", (req, res) => {
 // ===================== STUDENT REPORT API =====================
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
-
   const excelFile = path.join(__dirname, "data", "students.xlsx");
 
   if (!fs.existsSync(excelFile)) {
@@ -94,17 +76,25 @@ app.get("/api/report/:id", (req, res) => {
 
   const workbook = xlsx.readFile(excelFile);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = xlsx.utils.sheet_to_json(sheet);
 
-  // 🔍 دعم أكثر من اسم للعمود
-  const student = rows.find(r =>
-    String(r["الهوية"] || r["رقم الهوية"]).trim() === id.trim()
-  );
+  // نقرأ البيانات مع تحويل الأرقام إلى نصوص
+  const rows = xlsx.utils.sheet_to_json(sheet, { raw: false });
+
+  // دالة لتوحيد الهوية (إزالة المسافات والرموز)
+  function normalize(value) {
+    return String(value || "")
+      .replace(/[^0-9]/g, "") // أرقام فقط
+      .trim();
+  }
+
+  const cleanId = normalize(id);
+  const student = rows.find(r => normalize(r["الهوية"]) === cleanId);
 
   if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
 
+  // بناء جدول المواد
   const subjects = [];
   Object.keys(student).forEach(key => {
     if (key.startsWith("مادة")) {
