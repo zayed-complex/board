@@ -122,6 +122,7 @@ app.get("/api/report/:id", (req, res) => {
     subjects
   });
 });
+console.log("🔎 Looking for Excel file at:", excelFile);
 
 // ===================== START SERVER =====================
 app.listen(PORT, () => {
