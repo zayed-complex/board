@@ -50,11 +50,13 @@ const staffMenu = [
 ];
 
 // ===================== MENU API =====================
-app.get("/api/menu/:role", (req, res) => {
-  const { role } = req.params;
-  if (role === "student") return res.json(studentMenu);
-  if (role === "staff") return res.json(staffMenu);
-  return res.status(400).send("❌ دور غير معروف");
+app.get("/api/menu/:role/:section", (req, res) => {
+  const { role, section } = req.params;
+  let menu;
+  if (role === "student") menu = studentMenu;
+  else if (role === "staff") menu = staffMenu;
+  else return res.status(400).send("❌ دور غير معروف");
+  res.json(menu);
 });
 
 // ===================== LOGIN =====================
@@ -76,25 +78,13 @@ app.get("/api/report/:id", (req, res) => {
 
   const workbook = xlsx.readFile(excelFile);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = xlsx.utils.sheet_to_json(sheet);
 
-  // نقرأ البيانات مع تحويل الأرقام إلى نصوص
-  const rows = xlsx.utils.sheet_to_json(sheet, { raw: false });
-
-  // دالة لتوحيد الهوية (إزالة المسافات والرموز)
-  function normalize(value) {
-    return String(value || "")
-      .replace(/[^0-9]/g, "") // أرقام فقط
-      .trim();
-  }
-
-  const cleanId = normalize(id);
-  const student = rows.find(r => normalize(r["الهوية"]) === cleanId);
-
+  const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
   if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
 
-  // بناء جدول المواد
   const subjects = [];
   Object.keys(student).forEach(key => {
     if (key.startsWith("مادة")) {

@@ -2,88 +2,102 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تقرير طالب</title>
-  <link rel="stylesheet" href="style.css">
+  <title id="pageTitle">📑 تقرير الطالب</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <header id="reportHeader">📑 تقرير الطالب</header>
+
   <div class="container">
-    <h1 id="reportTitle">📑 تقرير طالب</h1>
-
-    <div class="search-box">
-      <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
-      <button id="searchBtn">عرض التقرير</button>
-    </div>
-
-    <div id="result"></div>
+    <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
+    <button onclick="loadReport()">عرض التقرير</button>
+    <button id="printBtn" onclick="window.print()">🖨️ طباعة</button>
+    <div id="error" class="error"></div>
+    <div id="report"></div>
   </div>
 
   <script>
-    // تحديد القسم من الرابط
     const params = new URLSearchParams(window.location.search);
-    const section = params.get("section") || "male";
+    const section = params.get("section") || sessionStorage.getItem("section") || "male";
+    sessionStorage.setItem("section", section);
 
-    // تغيير العنوان حسب القسم
-    const titleEl = document.getElementById("reportTitle");
-    if (section === "female") {
-      titleEl.textContent = "📑 تقرير طالبة";
-    } else {
-      titleEl.textContent = "📑 تقرير طالب";
-    }
+    const title = section === "female" ? "📑 تقرير الطالبة" : "📑 تقرير الطالب";
+    document.getElementById("pageTitle").textContent = title;
+    document.getElementById("reportHeader").textContent = title;
 
-    document.getElementById("searchBtn").addEventListener("click", async () => {
+    async function loadReport() {
       const id = document.getElementById("studentId").value.trim();
-      const res = await fetch(`/api/report/${id}`);
-      const data = await res.json();
-      const result = document.getElementById("result");
+      const reportDiv = document.getElementById("report");
+      const errorDiv = document.getElementById("error");
+      const printBtn = document.getElementById("printBtn");
 
-      if (data.error) {
-        result.innerHTML = `<p style="color:red">${data.error}</p>`;
+      reportDiv.innerHTML = "";
+      errorDiv.textContent = "";
+      printBtn.style.display = "none";
+
+      if (!id) {
+        errorDiv.textContent = "❌ الرجاء إدخال رقم الهوية.";
         return;
       }
 
-      // نص مجمع زايد حسب القسم
-      const schoolText =
-        section === "female"
-          ? "مجمع زايد التعليمي - الظيت / قسم الإناث"
-          : "مجمع زايد التعليمي - الظيت / قسم البنين";
+      try {
+        const res = await fetch(`/api/report/${id}`);
+        if (!res.ok) {
+          errorDiv.textContent = "❌ الطالب غير موجود.";
+          return;
+        }
 
-      // عرض بيانات الطالب
-      let html = `
-        <div class="student-info">
-          <img src="/icons/logo.png" alt="شعار المدرسة">
-          <p><strong>${schoolText}</strong></p>
-          <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
-          <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>المادة</th>
-              <th>تكويني</th>
-              <th>مشاركة</th>
-              <th>مهمة</th>
-              <th>التزام</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
+        const data = await res.json();
 
-      data.subjects.forEach(sub => {
-        html += `
-          <tr>
-            <td>${sub.name}</td>
-            <td>${sub.formative}</td>
-            <td>${sub.participation}</td>
-            <td>${sub.task}</td>
-            <td>${sub.commitment}</td>
-          </tr>
+        let html = `
+          <div class="student-info">
+            <img src="/icons/logo.png" alt="شعار المدرسة" width="80">
+            <p><strong>مجمع زايد التعليمي - الظيت / قسم ${section === "female" ? "الإناث" : "البنين"}</strong></p>
+            <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
+            <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>المادة</th>
+                <th>تكويني</th>
+                <th>مشاركة</th>
+                <th>مهمة</th>
+                <th>التزام</th>
+              </tr>
+            </thead>
+            <tbody>
         `;
-      });
 
-      html += "</tbody></table>";
-      result.innerHTML = html;
-    });
+        let notes = [];
+        data.subjects.forEach(sub => {
+          html += `
+            <tr>
+              <td>${sub.name}</td>
+              <td>${sub.formative}</td>
+              <td>${sub.participation}</td>
+              <td>${sub.task}</td>
+              <td>${sub.commitment}</td>
+            </tr>`;
+          if (sub.note && sub.note !== "-") notes.push(`${sub.name}: ${sub.note}`);
+        });
+
+        html += "</tbody></table>";
+
+        if (notes.length > 0) {
+          html += `
+            <div class="notes-box">
+              <h3>📝 الملاحظات:</h3>
+              <ul>${notes.map(n => `<li>${n}</li>`).join("")}</ul>
+            </div>`;
+        }
+
+        reportDiv.innerHTML = html;
+        printBtn.style.display = "inline-block";
+      } catch (err) {
+        errorDiv.textContent = "❌ حدث خطأ أثناء تحميل التقرير.";
+      }
+    }
   </script>
 </body>
 </html>
-MOE-DNE-G10_ADV-23-497
