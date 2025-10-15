@@ -97,8 +97,11 @@ app.get("/api/report/:id", (req, res) => {
   });
 
   const student = data.find(r => String(r["الهوية"]).trim() === id.trim());
-
-  if (!student) {
+   console.log("🔍 الهوية المطلوبة:", id);
+   console.log("📊 أول 5 سجلات من ملف Excel:");
+   rows.slice(0, 5).forEach(r => console.log(r["الهوية"], r["الاسم"]));
+  
+if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
   }
 
