@@ -10,7 +10,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+
+// ✅ تصحيح المسار إلى مجلد public
+app.use(express.static(path.join(__dirname, "../public")));
 
 // ===================== STAFF USERS =====================
 const STAFF_USERS = [
@@ -24,7 +26,7 @@ const studentMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
+  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
   { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "تقرير طالب", type: "page", path: "/report.html" },
   { title: "السياسات", type: "submenu", role: "student" },
@@ -39,17 +41,18 @@ const staffMenu = [
   { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
   { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
+  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
   { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "السياسات", type: "submenu", role: "staff" },
-  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn" },
+  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn"},
   { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
   { title: "روابط مهمة", type: "external", url: "https://sso.ese.gov.ae/" },
   { title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
-  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" }
+  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
-app.get("/api/menu/:role", (req, res) => {
+// ✅ إضافة section إلى مسار القائمة
+app.get("/api/menu/:role/:section", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
   if (role === "staff") return res.json(staffMenu);
@@ -68,7 +71,6 @@ app.post("/api/login", (req, res) => {
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
 
-  // المسار الصحيح للملف
   const excelFile = path.join(__dirname, "data", "students.xlsx");
   console.log("🔎 Looking for Excel file at:", excelFile);
   console.log("🔍 الهوية المطلوبة:", id);
@@ -78,45 +80,44 @@ app.get("/api/report/:id", (req, res) => {
   }
 
   try {
-    // قراءة الملف وتحويله إلى JSON
     const workbook = xlsx.readFile(excelFile);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
 
-    console.log("📊 عدد الصفوف:", rows.length);
+    // قراءة من الصف الثاني لأن الصف الأول يحتوي رؤوس الأعمدة
+    const rows = xlsx.utils.sheet_to_json(sheet, { range: 1 });
 
-    // البحث عن الطالب حسب الهوية
+    console.log("📊 أول 5 سجلات من ملف Excel:");
+    rows.slice(0, 5).forEach(r => {
+      console.log(r["الهوية"], r["الاسم"]);
+    });
+
     const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
-
     if (!student) {
       return res.status(404).json({ error: "❌ الطالب غير موجود" });
     }
 
-    // إعداد المواد
+    // ===== استخراج المواد =====
+    // المواد موجودة بعد الأعمدة الأساسية (الهوية - الاسم - الشعبة)
     const subjects = [];
-    // نلتقط أسماء المواد من الأعمدة التي تبدأ بكلمة "الاختبارات التكوينية" مثلاً
-    const headers = Object.keys(student);
+    const keys = Object.keys(student);
 
-    for (let i = 3; i < headers.length; i += 5) {
-      const subjectName = headers[i - 3]
-        ?.replace("الاختبارات التكوينية", "")
-        .replace("المشاركة الصفية", "")
-        .replace("انجاز المهام / مهمة الاداء", "")
-        .replace("الحضور والالتزام", "")
-        .replace("الملاحظات", "")
-        .trim() || `مادة ${(i - 2) / 5}`;
+    // نقوم بقراءة المواد بمجموعات (5 أعمدة لكل مادة)
+    // "الاختبارات التكوينية" - "المشاركة الصفية" - "انجاز المهام / مهمة الاداء" - "الحضور والالتزام" - "الملاحظات"
+    for (let i = 3; i < keys.length; i += 5) {
+      const subjectName = keys[i].split("الاختبارات")[0].trim();
+      if (!subjectName) continue;
 
       subjects.push({
-        name: subjectName || `مادة ${(i - 2) / 5}`,
-        formative: student[headers[i]] || "-",
-        participation: student[headers[i + 1]] || "-",
-        task: student[headers[i + 2]] || "-",
-        commitment: student[headers[i + 3]] || "-",
-        note: student[headers[i + 4]] || "-"
+        name: subjectName,
+        formative: student[keys[i]],
+        participation: student[keys[i + 1]],
+        task: student[keys[i + 2]],
+        commitment: student[keys[i + 3]],
+        note: student[keys[i + 4]]
       });
     }
 
-    // إعادة النتيجة
+    // ===== إرسال النتيجة =====
     res.json({
       student: {
         "الاسم": student["الاسم"],
@@ -130,6 +131,7 @@ app.get("/api/report/:id", (req, res) => {
     res.status(500).json({ error: "❌ حدث خطأ أثناء قراءة الملف" });
   }
 });
+
 // ===================== START SERVER =====================
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
