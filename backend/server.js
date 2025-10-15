@@ -84,7 +84,8 @@ app.get("/api/report/:id", (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
   // ✅ إذا كان الصف الأول لا يحتوي رؤوس الأعمدة (A2 = الهوية)
-  const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+  const rows = xlsx.utils.sheet_to_json(sheet, { range: 1 });
+
 
   // أول صف يحتوي العناوين
   const headers = rows[0];
