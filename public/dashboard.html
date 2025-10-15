@@ -219,7 +219,7 @@
 
     // ==================== فتح ملفات PDF ====================
     function openPdf(filename) {
-      const pdfUrl = `${BASE_URL}/api/pdfs/${filename}`;
+      const pdfUrl = `${BASE_URL}/pdfs/${filename}`;
       pdfViewer.src = `/pdfjs/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
       pdfContainer.style.display = "block";
       pdfContainer.scrollIntoView({ behavior: "smooth" });
