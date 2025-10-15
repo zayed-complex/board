@@ -94,7 +94,7 @@ function loadStudentsFromExcel() {
     if (!studentId) return;
 
     const name = row[1] ? String(row[1]).trim() : "-";
-    const className = row[2] ? String(row[2]).trim() : "-";
+    const className = row[3] ? String(row[3]).trim() : "-";
 
     const subjects = subject_names.map((sub, i) => {
       const base = 4 + i * 5; // من العمود الرابع تبدأ المواد
@@ -114,8 +114,6 @@ function loadStudentsFromExcel() {
     };
   });
 
-  console.log(`✅ تم تحميل ${Object.keys(students).length} طالب من الملف.`);
-  console.log("👀 أول 5 هويات:", Object.keys(students).slice(0, 5));
   return students;
 }
 
@@ -125,7 +123,6 @@ let studentReports = loadStudentsFromExcel();
 // ===================== API: GET REPORT =====================
 app.get("/api/report/:id", (req, res) => {
   const id = String(req.params.id).trim();
-  console.log("🔍 الهوية المطلوبة:", id);
 
   const student = studentReports[id];
   if (!student) {
