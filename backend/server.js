@@ -71,7 +71,6 @@ app.post("/api/login", (req, res) => {
 app.get("/api/report/:id", (req, res) => {
   const { id } = req.params;
 
-  // المسار الصحيح لملف الإكسل
   const excelFile = path.join(__dirname, "data", "students.xlsx");
   console.log("🔎 Looking for Excel file at:", excelFile);
   console.log("🔍 الهوية المطلوبة:", id);
@@ -84,36 +83,47 @@ app.get("/api/report/:id", (req, res) => {
     const workbook = xlsx.readFile(excelFile);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    // ✅ قراءة البيانات من الصف الثاني (لأن الصف الأول غير رؤوس)
+    // قراءة من الصف الثاني لأن الصف الأول يحتوي رؤوس الأعمدة
     const rows = xlsx.utils.sheet_to_json(sheet, { range: 1 });
 
-    // طباعة أول 5 صفوف لفحص الأسماء والهوية
     console.log("📊 أول 5 سجلات من ملف Excel:");
     rows.slice(0, 5).forEach(r => {
       console.log(r["الهوية"], r["الاسم"]);
     });
 
-    // ✅ البحث عن الطالب حسب الهوية
     const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
     if (!student) {
       return res.status(404).json({ error: "❌ الطالب غير موجود" });
     }
 
-    // ✅ استخراج المواد (طريقة مرنة)
+    // ===== استخراج المواد =====
+    // المواد موجودة بعد الأعمدة الأساسية (الهوية - الاسم - الشعبة)
     const subjects = [];
-    const columns = Object.keys(student);
-    for (let i = 0; i < columns.length; i++) {
-      const key = columns[i];
-      if (key.includes("المشاركة الصفية") || key.includes("تكوينية") || key.includes("العلوم")) continue;
+    const keys = Object.keys(student);
+
+    // نقوم بقراءة المواد بمجموعات (5 أعمدة لكل مادة)
+    // "الاختبارات التكوينية" - "المشاركة الصفية" - "انجاز المهام / مهمة الاداء" - "الحضور والالتزام" - "الملاحظات"
+    for (let i = 3; i < keys.length; i += 5) {
+      const subjectName = keys[i].split("الاختبارات")[0].trim();
+      if (!subjectName) continue;
+
+      subjects.push({
+        name: subjectName,
+        formative: student[keys[i]],
+        participation: student[keys[i + 1]],
+        task: student[keys[i + 2]],
+        commitment: student[keys[i + 3]],
+        note: student[keys[i + 4]]
+      });
     }
 
-    // إعداد البيانات النهائية
+    // ===== إرسال النتيجة =====
     res.json({
       student: {
         "الاسم": student["الاسم"],
         "الشعبة": student["الشعبة"]
       },
-      subjects: [] // مؤقتًا حتى نضبط الأعمدة لاحقًا
+      subjects
     });
 
   } catch (err) {
