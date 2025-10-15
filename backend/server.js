@@ -24,9 +24,13 @@ const studentMenu = [
   { title: "جداول الحلقة الثانية", type: "pdf", filename: "cycle2.pdf" },
   { title: "جداول الحلقة الثالثة", type: "pdf", filename: "cycle3.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
+  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
+  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
   { title: "تقرير طالب", type: "page", path: "/report.html" },
-  { title: "السياسات", type: "submenu", role: "student" }
+  { title: "السياسات", type: "submenu", role: "student" },
+  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
+  { title: "وزارة التربية والتعليم", type: "external", url: "https://moe.gov.ae/ar/Pages/home.aspx" },
+  { title: "بوابة التعلم الذكي", type: "external", url: "https://lms.moe.gov.ae/" }
 ];
 
 const staffMenu = [
@@ -35,10 +39,50 @@ const staffMenu = [
   { title: "جداول المعلمين", type: "pdf", filename: "teachers.pdf" },
   { title: "جداول المناوبة", type: "pdf", filename: "duties.pdf" },
   { title: "التوقيت الزمني للحصص", type: "pdf", filename: "timings.pdf" },
-  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j" },
-  { title: "السياسات", type: "submenu", role: "staff" }
+  { title: "الخطة الاسبوعية", type: "external", url: "https://tinyurl.com/7b5nu45j"},
+  { title: "أرقام التواصل", type: "pdf", filename: "numbers.pdf" },
+  { title: "السياسات", type: "submenu", role: "staff" },
+  { title: "الشؤون الأكاديمية", type: "external", url: "https://tinyurl.com/2de67jvn"},
+  { title: "منصة ألف", type: "external", url: "https://www.alefed.com" },
+  { title: "روابط مهمة", type: "external", url: "https://sso.ese.gov.ae/" },
+  { title: "منهاجي", type: "external", url: "https://minhaji.moe.gov.ae/library" },
+  { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
+app.get("/api/menu/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentMenu);
+  if (role === "staff") return res.json(staffMenu);
+  return res.status(400).send("❌ دور غير معروف");
+});
+
+// ===================== POLICIES =====================
+const studentPolicies = [
+  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
+  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
+  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
+  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
+  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
+  { title: "سياسة الحضور والغياب", filename: "attendance_policy.pdf" }
+];
+
+const staffPolicies = [
+  { title: "اللائحة السلوكية", filename: "behavior_policy.pdf" },
+  { title: "سياسة التقييم", filename: "assessment_policy.pdf" },
+  { title: "سياسة المغادرة", filename: "leave_policy.pdf" },
+  { title: "سياسة الأمن الرقمي", filename: "digital_safety_policy.pdf" },
+  { title: "سياسة حقوق الطفل", filename: "child_rights_policy.pdf" },
+  { title: "سياسة الحضور والانصراف", filename: "attendance_policy.pdf" },
+  { title: "إطار معايير الرقابة والتقييم المدرسية", filename: "framework.pdf" },
+  { title: "السياسات المهنية والأخلاقية", filename: "ethics_charter_policy.pdf" }
+];
+
+app.get("/api/policies/:role", (req, res) => {
+  const { role } = req.params;
+  if (role === "student") return res.json(studentPolicies);
+  if (role === "staff") return res.json(staffPolicies);
+  return res.status(400).send("❌ دور غير معروف");
+});
 // ===================== MENU API =====================
 app.get("/api/menu/:role/:section", (req, res) => {
   const { role, section } = req.params;
@@ -80,8 +124,8 @@ app.get("/api/report/:id", (req, res) => {
   // تحديد ملف Excel حسب القسم
   const excelFile =
     section === "female"
-      ? path.join(__dirname, "data", "students_female.xlsx")
-      : path.join(__dirname, "data", "students_male.xlsx");
+      ? path.join(__dirname, "data", "studentsg.xlsx")
+      : path.join(__dirname, "data", "students.xlsx");
 
   if (!fs.existsSync(excelFile)) {
     return res.status(404).json({ error: "❌ ملف البيانات غير موجود" });
