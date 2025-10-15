@@ -22,24 +22,6 @@
       flex-direction: column;
       gap: 5px;
     }
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .header-top img {
-      width: 60px;
-      height: 60px;
-      border-radius: 8px;
-      background: #fff;
-      padding: 4px;
-    }
-    .school-name {
-      font-size: 18px;
-      color: #ecf0f1;
-      margin: 0;
-    }
     .container {
       margin: 30px auto;
       max-width: 900px;
@@ -47,9 +29,6 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .search-box {
-      margin-bottom: 20px;
     }
     input[type="text"] {
       padding: 8px;
@@ -69,11 +48,18 @@
       margin: 5px;
     }
     button:hover { background: #3498db; }
-    .student-info {
-      margin: 15px 0;
-      font-size: 18px;
-      color: #2c3e50;
+    .error { color: red; margin-top: 15px; font-weight: bold; }
+    #printBtn { display: none; background: #27ae60; }
+    #printBtn:hover { background: #2ecc71; }
+    .notes-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fdf6e3;
+      border: 1px solid #eed;
+      border-radius: 8px;
+      text-align: right;
     }
+    .notes-box h3 { margin-top: 0; color: #b58900; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -88,61 +74,29 @@
       background: #34495e;
       color: #fff;
     }
-    .error {
-      color: red;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    #printBtn {
-      display: none;
-      background: #27ae60;
-    }
-    #printBtn:hover {
-      background: #2ecc71;
-    }
-    .notes-box {
-      margin-top: 20px;
-      padding: 15px;
-      background: #fdf6e3;
-      border: 1px solid #eed;
-      border-radius: 8px;
-      text-align: right;
-    }
-    .notes-box h3 {
-      margin-top: 0;
-      color: #b58900;
-    }
-    #navControls {
-      margin: 10px;
-    }
   </style>
 </head>
-
-<div id="navControls">
-  <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
-  <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
-</div>
-
 <body>
-  <header>
-    <div class="header-top">
-      <span>📑 تقرير الطالب</span>
-    </div>
-  </header>
+  <header>📑 تقرير الطالب</header>
 
   <div class="container">
-    <div class="search-box">
-      <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
-      <button onclick="loadReport()">عرض التقرير</button>
-      <button id="printBtn" onclick="window.print()">🖨️ طباعة</button>
-    </div>
+    <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
+    <button onclick="loadReport()">عرض التقرير</button>
+    <button id="printBtn" onclick="window.print()">🖨️ طباعة</button>
     <div id="error" class="error"></div>
     <div id="report"></div>
   </div>
 
   <script>
+    // 🔹 دالة لتحديد القسم من الرابط أو sessionStorage
+    function getSection() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("section") || sessionStorage.getItem("section") || "male";
+    }
+
     async function loadReport() {
       const id = document.getElementById("studentId").value.trim();
+      const section = getSection(); // male / female
       const reportDiv = document.getElementById("report");
       const errorDiv = document.getElementById("error");
       const printBtn = document.getElementById("printBtn");
@@ -157,8 +111,7 @@
       }
 
       try {
-        // بدون ?section=
-        const res = await fetch(`/api/report/${id}`);
+        const res = await fetch(`/api/report/${id}?section=${section}`);
         if (!res.ok) {
           if (res.status === 404) {
             errorDiv.textContent = "❌ الطالب غير موجود.";
@@ -172,7 +125,7 @@
 
         let html = `
           <div class="student-info">
-            <img src="/icons/logo.png" alt="شعار المدرسة">
+            <img src="/icons/logo.png" alt="شعار المدرسة" width="80">
             <p><strong>مجمع زايد التعليمي - الظيت</strong></p>
             <p><strong>الاسم:</strong> ${data.student["الاسم"]}</p>
             <p><strong>الشعبة:</strong> ${data.student["الشعبة"]}</p>
@@ -225,27 +178,6 @@
         errorDiv.textContent = "❌ حدث خطأ غير متوقع.";
       }
     }
-
-    // ====== أزرار الرجوع / الإنهاء ======
-    document.getElementById("backBtn").onclick = () => {
-      window.location.href = "/index.html";
-    };
-
-    document.getElementById("exitBtn").onclick = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        window.close();
-      } else {
-        document.body.innerHTML = `
-          <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;font-family:sans-serif;">
-            <h2>👋 تم إنهاء الجلسة</h2>
-            <p>يمكنك الآن إغلاق الصفحة أو العودة لاحقًا.</p>
-            <button onclick="window.location.href='/index.html'" style="margin-top:20px;padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:white;font-size:16px;">
-              🔁 عودة للرئيسية
-            </button>
-          </div>
-        `;
-      }
-    };
   </script>
 </body>
 </html>
