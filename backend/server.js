@@ -49,6 +49,7 @@ const staffMenu = [
   { title: "الغياب والحضور اليومي", type: "external", url: "https://emiratesschoolsese-my.sharepoint.com/" },
 ];
 
+// ===================== MENU API (أساسي) =====================
 app.get("/api/menu/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentMenu);
@@ -83,7 +84,8 @@ app.get("/api/policies/:role", (req, res) => {
   if (role === "staff") return res.json(staffPolicies);
   return res.status(400).send("❌ دور غير معروف");
 });
-// ===================== MENU API =====================
+
+// ===================== MENU API (مع القسم) =====================
 app.get("/api/menu/:role/:section", (req, res) => {
   const { role, section } = req.params;
 
@@ -135,7 +137,7 @@ app.get("/api/report/:id", (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet);
 
-  // مطابقة أكثر مرونة
+  // مطابقة الهوية
   const student = rows.find(r => String(r["الهوية"]).trim() === id.trim());
   if (!student) {
     return res.status(404).json({ error: "❌ الطالب غير موجود" });
@@ -155,15 +157,6 @@ app.get("/api/report/:id", (req, res) => {
       });
     }
   });
-
-  res.json({
-    student: {
-      "الاسم": student["الاسم"],
-      "الشعبة": student["الشعبة"]
-    },
-    subjects
-  });
-});
 
   res.json({
     student: {
