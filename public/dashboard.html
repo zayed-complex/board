@@ -15,39 +15,37 @@
       margin: 0;
     }
 
+    /* ========== رأس الصفحة ========== */
     header {
       background: #2c3e50;
       color: white;
       padding: 15px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 5px;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
-    .header-top {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-top img {
-      width: 60px;
-      height: 60px;
-      border-radius: 8px;
+    header img {
+      width: 65px;
+      height: 65px;
+      border-radius: 10px;
       background: #fff;
       padding: 4px;
     }
 
     .school-name {
-      font-size: 18px;
+      font-size: 20px;
       color: #ecf0f1;
+      font-weight: bold;
     }
 
     h1 {
-      margin: 15px 0;
-      color: #fff;
+      margin: 0;
+      font-size: 20px;
+      color: #ecf0f1;
     }
 
     /* ========== الأزرار ========== */
@@ -107,7 +105,11 @@
 
     /* ========== استجابة للشاشات الصغيرة ========== */
     @media (max-width: 768px) {
-      #pdfViewer { height: 90vh; width: 100%; }
+      header {
+        flex-direction: column;
+        gap: 10px;
+      }
+      #pdfViewer { height: 90vh; }
       .button { width: 90%; }
       #menuContainer, #navControls {
         flex-direction: column;
@@ -120,10 +122,8 @@
 
   <!-- 🔹 رأس الصفحة -->
   <header>
-    <div class="header-top">
-      <img src="/icons/logo.png" alt="شعار المدرسة">
-      <div class="school-name">مجمع زايد التعليمي - الظيت</div>
-    </div>
+    <div class="school-name">مجمع زايد التعليمي - الظيت</div>
+    <img src="/icons/logo.png" alt="شعار المدرسة">
     <h1 id="pageTitle">🎓 لوحة التحكم</h1>
   </header>
 
