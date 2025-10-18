@@ -82,7 +82,6 @@ app.get("/api/policies/:role", (req, res) => {
   return res.status(400).json({ error: "❌ دور غير معروف" });
 });
 
-
 app.get("/api/policies/:role", (req, res) => {
   const { role } = req.params;
   if (role === "student") return res.json(studentPolicies);
@@ -90,17 +89,34 @@ app.get("/api/policies/:role", (req, res) => {
   return res.status(400).send("❌ دور غير معروف");
 });
 
-
-
 // ===================== API: MENU (WITH SECTION) =====================
 app.get("/api/menu/:role/:section", (req, res) => {
   const { role, section } = req.params;
 
-  // ✳️ نستخدم section لتخصيص القوائم في المستقبل (حاليًا لا تغيير)
   console.log(`📋 Loading menu for role=${role}, section=${section}`);
 
-  if (role === "student") return res.json(studentMenu);
-  if (role === "staff") return res.json(staffMenu);
+  // 🔸 الملفات التي لها نسخ خاصة للبنات
+  const genderSpecificFiles = [
+    "cycle2.pdf",
+    "cycle3.pdf",
+    "teachers.pdf",
+    "timings.pdf",
+    "duties.pdf",
+    "numbers.pdf"
+  ];
+
+  // 🔸 تعديل القائمة فقط إن كان القسم "female"
+  const adjustForSection = (menu) =>
+    menu.map(item => {
+      if (section === "female" && item.filename && genderSpecificFiles.includes(item.filename)) {
+        const femaleVersion = item.filename.replace(".pdf", "g.pdf");
+        return { ...item, filename: femaleVersion };
+      }
+      return item;
+    });
+
+  if (role === "student") return res.json(adjustForSection(studentMenu));
+  if (role === "staff") return res.json(adjustForSection(staffMenu));
 
   return res.status(400).json({ error: "❌ دور غير معروف" });
 });
