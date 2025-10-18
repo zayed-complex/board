@@ -1,95 +1,242 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>تسجيل الدخول - مجمع زايد التعليمي</title>
-<style>
-body { font-family: "Tahoma", Arial, sans-serif; text-align: center; padding: 50px; background: #f4f6f8; }
-h1 { margin-bottom: 30px; color: #333; }
-select, input, button { font-size: 16px; margin: 5px; }
-button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; background: #3498db; color: #fff; transition: 0.2s; }
-button:hover { background: #217dbb; transform: translateY(-2px); }
-.hidden { display: none; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔐 نظام الدخول الموحّد - مجمّع زايد التعليمي - الظيت</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1976d2" />
+
+  <style>
+    :root {
+      --primary: #1976d2;
+      --primary-dark: #0d47a1;
+      --accent: #e3f2fd;
+      --danger: #e53935;
+      --success: #43a047;
+    }
+
+    body {
+      font-family: "Cairo", sans-serif;
+      background: linear-gradient(135deg, var(--accent), #bbdefb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-card {
+      background: #fff;
+      padding: 45px 30px 35px;
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 340px;
+      position: relative;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: -70px auto 15px;
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+    }
+
+    h2 {
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 1.3em;
+    }
+
+    label {
+      display: block;
+      text-align: right;
+      font-size: 0.9em;
+      color: #333;
+      margin: 8px 0 4px;
+    }
+
+    select, input {
+      width: 92%;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+      font-size: 0.95em;
+      transition: 0.3s;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+      outline: none;
+    }
+
+    button {
+      width: 94%;
+      padding: 11px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: 0.3s;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .msg {
+      display: none;
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 0.85em;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .msg.error {
+      background-color: #ffebee;
+      color: var(--danger);
+      border: 1px solid #ffcdd2;
+    }
+
+    .msg.success {
+      background-color: #e8f5e9;
+      color: var(--success);
+      border: 1px solid #c8e6c9;
+    }
+
+    footer {
+      margin-top: 20px;
+      color: #777;
+      font-size: 0.8em;
+      line-height: 1.5em;
+    }
+  </style>
 </head>
 <body>
+  <div class="login-card">
+    <div class="logo">
+      <img src="icons/logo1.png" alt="شعار المدرسة" />
+    </div>
+    <h2>نظام الدخول الموحّد</h2>
 
-<h1>🔐 نظام الدخول الموحّد</h1>
-<img src="/icons/logo.png" alt="شعار المدرسة" width="70">
-<h2>مرحباً بك في مجمع زايد التعليمي</h2>
+    <label for="role">اختر الدور</label>
+    <select id="role">
+      <option value="">-- اختر الدور --</option>
+      <option value="student">👨‍🎓 طالب / ولي الأمر</option>
+      <option value="staff">🧑‍🏫 معلم / إداري</option>
+    </select>
 
-<label for="sectionSelect">اختر القسم</label>
-<select id="sectionSelect">
-  <option value="">-- اختر القسم --</option>
-  <option value="male">قسم الذكور</option>
-  <option value="female">قسم الإناث</option>
-</select>
+    <div id="staffLoginFields" style="display:none">
+      <label for="username">اسم المستخدم</label>
+      <input type="text" id="username" placeholder="أدخل اسم المستخدم" />
 
-<label for="roleSelect">اختر الدور</label>
-<select id="roleSelect" onchange="handleRoleChange()">
-  <option value="">-- اختر الدور --</option>
-  <option value="student">طالب / ولي أمر</option>
-  <option value="staff">معلم / إداري</option>
-</select>
+      <label for="password">كلمة المرور</label>
+      <input type="password" id="password" placeholder="أدخل كلمة المرور" />
+    </div>
 
-<div id="loginFields" class="hidden">
-  <label>اسم المستخدم</label>
-  <input type="text" id="username" placeholder="أدخل اسم المستخدم" />
-  <label>كلمة المرور</label>
-  <input type="password" id="password" placeholder="أدخل كلمة المرور" />
-  <button onclick="login()">تسجيل الدخول</button>
-  <p id="loginMessage" style="color:red; margin-top:10px;"></p>
-</div>
+    <button id="loginBtn">تسجيل الدخول</button>
+    <div id="loginMessage" class="msg"></div>
 
-<script>
-function handleRoleChange() {
-  const role = document.getElementById("roleSelect").value;
-  const section = document.getElementById("sectionSelect").value || "male";
-  const loginFields = document.getElementById("loginFields");
-  const msg = document.getElementById("loginMessage");
-  if (msg) msg.textContent = "";
+    <footer>
+      © 2025 - جميع الحقوق محفوظة<br>
+      مجمّع زايد التعليمي - الظيت
+    </footer>
+  </div>
 
-  if (!role) return;
+  <script>
+    const roleSelect = document.getElementById("role");
+    const staffFields = document.getElementById("staffLoginFields");
+    const msg = document.getElementById("loginMessage");
 
-  if (role === "staff") {
-    // المعلم/إداري يحتاج تسجيل دخول
-    loginFields.classList.remove("hidden");
-  } else if (role === "student") {
-    // الطالب/ولي أمر لا يحتاج تسجيل دخول
-    sessionStorage.setItem("role", "student");
-    sessionStorage.setItem("section-role", section);
-    window.location.href = `dashboard.html?role=student&section=${section}`;
-  }
-}
+    roleSelect.addEventListener("change", () => {
+      staffFields.style.display = roleSelect.value === "staff" ? "block" : "none";
+      msg.style.display = "none";
+    });
 
-function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const section = document.getElementById("sectionSelect").value || "male";
-  const msg = document.getElementById("loginMessage");
-  msg.textContent = "";
+    function showMsg(text, isError = false) {
+      msg.textContent = text;
+      msg.className = "msg " + (isError ? "error" : "success");
+      msg.style.display = "block";
+    }
 
-  if (!username || !password) {
-    msg.textContent = "❌ يرجى إدخال اسم المستخدم وكلمة المرور";
-    return;
-  }
+    function login() {
+      const role = roleSelect.value;
+      msg.style.display = "none";
 
-  // تحقق تجريبي
-  const validUsers = [
-    { username: "admin", password: "1234" },
-    { username: "staff", password: "abcd" }
-  ];
+      if (!role) return showMsg("❌ يرجى اختيار الدور", true);
 
-  const user = validUsers.find(u => u.username === username && u.password === password);
-  if (user) {
-    sessionStorage.setItem("role", "staff");
-    sessionStorage.setItem("section-role", section);
-    window.location.href = `dashboard.html?role=staff&section=${section}`;
-  } else {
-    msg.textContent = "❌ اسم المستخدم أو كلمة المرور خاطئة";
-  }
-}
-</script>
+      if (role === "student") {
+        sessionStorage.setItem("role", "student");
+        showMsg("✅ تم تسجيل الدخول كطالب", false);
+        setTimeout(() => (window.location.href = "dashboard.html"), 700);
+      } else {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!username || !password)
+          return showMsg("❌ يرجى تعبئة جميع الحقول", true);
+
+        if (username === "admin" && password === "1234") {
+          sessionStorage.setItem("role", "staff");
+          showMsg("✅ تم تسجيل الدخول بنجاح", false);
+          setTimeout(() => (window.location.href = "dashboard.html"), 700);
+        } else {
+          showMsg("❌ بيانات الدخول غير صحيحة", true);
+        }
+      }
+    }
+
+    document.getElementById("loginBtn").onclick = login;
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
+  </script>
+
+  <script>
+    // ✅ تسجيل الـ Service Worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then(() => console.log("✅ Service Worker مسجّل"))
+        .catch(err => console.error("❌ فشل تسجيل Service Worker:", err));
+    }
+
+    // ✅ التعرف على تشغيل التطبيق كـ PWA
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log("📱 التطبيق يعمل كـ PWA");
+    }
+  </script>
 </body>
 </html>
