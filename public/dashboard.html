@@ -15,42 +15,47 @@
       overflow: hidden;
     }
 
-    /* 🔹 شريط العنوان العلوي */
+    /* 🔹 الشريط العلوي */
     header {
       background: #2c3e50;
       color: white;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 15px;
+      justify-content: center;
+      flex-direction: column;
+      padding: 10px;
+      text-align: center;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
-
-    header .left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      position: relative;
     }
 
     header img {
-      width: 55px;
-      height: 55px;
+      width: 60px;
+      height: 60px;
       border-radius: 10px;
       background: white;
       padding: 4px;
+      margin-bottom: 6px;
     }
 
     .school-name {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
-    }
-
-    #pageTitle {
-      font-size: 15px;
+      margin-bottom: 3px;
       color: #ecf0f1;
     }
 
+    #pageTitle {
+      font-size: 17px;
+      color: #dce3e9;
+    }
+
+    /* زر القائمة للجوال */
     #toggleBtn {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
       display: none;
       background: transparent;
       border: none;
@@ -161,16 +166,12 @@
 
     /* 🔹 تصميم الجوال */
     @media (max-width: 768px) {
-      header {
-        justify-content: space-between;
-      }
-
       #toggleBtn {
         display: block;
       }
 
-      .main {
-        flex-direction: column;
+      header {
+        padding: 15px 40px;
       }
 
       #sidebar {
@@ -188,23 +189,23 @@
       #overlay.active {
         display: block;
       }
+
+      #pdfContainer {
+        height: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <!-- 🔹 الشريط العلوي -->
   <header>
-    <div class="left">
-      <img src="/icons/logo.png" alt="شعار المدرسة" />
-      <div>
-        <div class="school-name">مجمع زايد التعليمي - الظيت</div>
-        <div id="pageTitle">🎓 لوحة التحكم</div>
-      </div>
-    </div>
     <button id="toggleBtn" title="فتح القائمة">☰</button>
+    <img src="/icons/logo.png" alt="شعار المدرسة" />
+    <div class="school-name">مجمع زايد التعليمي - الظيت</div>
+    <div id="pageTitle">🎓 لوحة التحكم</div>
   </header>
 
-  <!-- 🔹 التراك -->
+  <!-- 🔹 تراك القائمة -->
   <div id="overlay"></div>
 
   <!-- 🔹 المحتوى الرئيسي -->
