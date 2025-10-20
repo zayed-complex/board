@@ -6,230 +6,147 @@
   <title>🎓 لوحة التحكم</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
+    /* ========== الأساسيات ========== */
     body {
       font-family: "Tahoma", Arial, sans-serif;
-      margin: 0;
+      text-align: center;
+      padding: 0;
       background: #f4f6f8;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
+      margin: 0;
     }
 
-    /* 🔹 السايدبار */
-    #sidebar {
-      width: 280px;
+    /* ========== رأس الصفحة ========== */
+    header {
       background: #2c3e50;
       color: white;
+      padding: 15px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      padding: 15px 10px;
-      box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-      transition: width 0.3s ease;
-      position: relative;
-      z-index: 10;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
-    /* عند الطيّ */
-    #sidebar.collapsed {
-      width: 80px;
-    }
-
-    #toggleBtn {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    #toggleBtn:hover {
-      transform: scale(1.2);
-    }
-
-    #sidebar header {
-      text-align: center;
-      margin-bottom: 20px;
-      transition: opacity 0.3s;
-    }
-
-    #sidebar.collapsed header .school-name,
-    #sidebar.collapsed header #pageTitle {
-      display: none;
-    }
-
-    #sidebar img {
-      width: 60px;
-      height: 60px;
+    header img {
+      width: 65px;
+      height: 65px;
       border-radius: 10px;
       background: #fff;
       padding: 4px;
-      margin-bottom: 10px;
-      transition: width 0.3s, height 0.3s;
-    }
-
-    #sidebar.collapsed img {
-      width: 50px;
-      height: 50px;
     }
 
     .school-name {
-      font-size: 18px;
+      font-size: 20px;
+      color: #ecf0f1;
       font-weight: bold;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
       color: #ecf0f1;
     }
 
-    #pageTitle {
-      font-size: 15px;
-      color: #bdc3c7;
-      margin-top: 6px;
-    }
-
-    /* 🔹 أزرار القائمة */
-    #menuContainer {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      overflow-y: auto;
-      padding: 0 5px;
-      transition: all 0.3s;
-    }
-
+    /* ========== الأزرار ========== */
     .button {
-      width: 100%;
-      padding: 10px 12px;
-      background: #3498db;
+      padding: 10px 18px;
+      font-size: 1em;
       border: none;
       border-radius: 8px;
-      color: white;
-      font-size: 15px;
       cursor: pointer;
-      text-align: center;
+      color: #fff;
       transition: 0.2s;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 5px;
     }
 
-    .button:hover {
-      background: #217dbb;
-    }
+    .btn-primary { background-color: #3498db; }
+    .btn-primary:hover { background-color: #217dbb; }
 
-    #sidebar.collapsed .button {
-      font-size: 0;
-      padding: 10px 0;
-    }
+    .btn-danger { background-color: #e74c3c; }
+    .btn-danger:hover { background-color: #c0392b; }
 
-    #sidebar.collapsed .button::before {
-      content: "📄";
-      font-size: 20px;
-    }
-
-    /* 🔹 أزرار التحكم السفلي */
-    #navControls {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 15px;
-    }
-
-    .btn-danger {
-      background-color: #e74c3c;
-    }
-
-    .btn-danger:hover {
-      background-color: #c0392b;
-    }
-
-    /* 🔹 منطقة عرض PDF */
-    #pdfContainer {
-      flex: 1;
-      background: #fff;
+    /* ========== الحاويات ========== */
+    #menuContainer, #navControls {
       display: flex;
       justify-content: center;
-      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 15px auto;
+    }
+
+    #navControls {
+      background: #fff;
       padding: 10px;
-      overflow: hidden;
-      transition: margin 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* ========== PDF Viewer ========== */
+    #pdfContainer {
+      display: none;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
     }
 
     #pdfViewer {
       width: 100%;
-      height: 100%;
+      height: 85vh;
       border: none;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      border-radius: 0;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    /* 🔹 تصميم الجوال */
+    /* ========== استجابة للشاشات الصغيرة ========== */
     @media (max-width: 768px) {
-      body {
+      header {
         flex-direction: column;
+        gap: 10px;
       }
-      #sidebar {
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        overflow-x: auto;
-      }
-      #toggleBtn {
-        left: unset;
-        right: 10px;
-        top: 10px;
-      }
-      #menuContainer {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding: 5px;
-      }
-      #pdfContainer {
-        height: calc(100vh - 180px);
+      #pdfViewer { height: 90vh; }
+      .button { width: 90%; }
+      #menuContainer, #navControls {
+        flex-direction: column;
+        gap: 8px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 🔹 السايدبار -->
-  <div id="sidebar">
-    <button id="toggleBtn" title="طي / فتح القائمة">☰</button>
+  <!-- 🔹 رأس الصفحة -->
+  <header>
+    <div class="school-name">مجمع زايد التعليمي - الظيت</div>
+    <img src="/icons/logo.png" alt="شعار المدرسة">
+    <h1 id="pageTitle">🎓 لوحة التحكم</h1>
+  </header>
 
-    <header>
-      <img src="/icons/logo.png" alt="شعار المدرسة">
-      <div class="school-name">مجمع زايد التعليمي - الظيت</div>
-      <div id="pageTitle">🎓 لوحة التحكم</div>
-    </header>
+  <!-- 🔹 قائمة الأزرار -->
+  <div id="menuContainer"></div>
 
-    <div id="menuContainer"></div>
-
-    <div id="navControls">
-      <button id="backBtn" class="button">🔙 رجوع للرئيسية</button>
-      <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
-    </div>
+  <!-- 🔹 أزرار التنقل -->
+  <div id="navControls">
+    <button id="backBtn" class="button btn-primary">🔙 رجوع للرئيسية</button>
+    <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
   </div>
 
-  <!-- 🔹 منطقة عرض PDF -->
+  <!-- 🔹 عرض PDF -->
   <div id="pdfContainer">
     <iframe id="pdfViewer"></iframe>
   </div>
 
   <script>
-    const sidebar = document.getElementById("sidebar");
-    const toggleBtn = document.getElementById("toggleBtn");
+    // ==================== المتغيرات العامة ====================
     const menuContainer = document.getElementById("menuContainer");
+    const pdfContainer = document.getElementById("pdfContainer");
     const pdfViewer = document.getElementById("pdfViewer");
     const pageTitle = document.getElementById("pageTitle");
-
-    // زر الطيّ / الفتح
-    toggleBtn.onclick = () => sidebar.classList.toggle("collapsed");
 
     // ==================== تحديد الدور والقسم ====================
     const params = new URLSearchParams(window.location.search);
@@ -255,21 +172,24 @@
       .then(menuItems => renderMenu(menuItems))
       .catch(err => {
         console.error("خطأ في تحميل القائمة:", err);
-        menuContainer.innerHTML = "<p style='color:red;text-align:center;'>❌ تعذر تحميل القائمة من الخادم.</p>";
+        menuContainer.innerHTML = "<p style='color:red;'>❌ تعذر تحميل القائمة من الخادم.</p>";
       });
 
+    // ==================== عرض القائمة ====================
     function renderMenu(menu) {
       menuContainer.innerHTML = "";
       menu.forEach(item => {
         const btn = document.createElement("button");
-        btn.className = "button";
+        btn.className = "button btn-primary";
         btn.textContent = item.title;
         btn.onclick = () => handleMenuClick(item);
         menuContainer.appendChild(btn);
       });
     }
 
+    // ==================== التعامل مع نقر الأزرار ====================
     function handleMenuClick(item) {
+      pdfContainer.style.display = "none";
       switch (item.type) {
         case "pdf":
           openPdf(item.filename);
@@ -286,12 +206,17 @@
       }
     }
 
+    // ==================== فتح ملفات PDF ====================
     function openPdf(filename) {
       const pdfUrl = `${BASE_URL}/pdfs/${filename}`;
       pdfViewer.src = `/pdfjs/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+      pdfContainer.style.display = "block";
+      pdfContainer.scrollIntoView({ behavior: "smooth" });
     }
 
+    // ==================== أزرار الرجوع / الإنهاء ====================
     document.getElementById("backBtn").onclick = () => window.location.href = "./index.html";
+
     document.getElementById("exitBtn").onclick = () => {
       if (window.matchMedia('(display-mode: standalone)').matches) {
         window.close();
