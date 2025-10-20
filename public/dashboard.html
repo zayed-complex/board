@@ -1,17 +1,68 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🎓 لوحة التحكم</title>
-  <link rel="stylesheet" href="css/style.css">
   <style>
     body {
       font-family: "Tahoma", Arial, sans-serif;
       margin: 0;
       background: #f4f6f8;
       display: flex;
+      flex-direction: column;
       height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 🔹 شريط العنوان العلوي */
+    header {
+      background: #2c3e50;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    header .left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header img {
+      width: 55px;
+      height: 55px;
+      border-radius: 10px;
+      background: white;
+      padding: 4px;
+    }
+
+    .school-name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #pageTitle {
+      font-size: 15px;
+      color: #ecf0f1;
+    }
+
+    #toggleBtn {
+      display: none;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    /* 🔹 الحاوية الرئيسية */
+    .main {
+      flex: 1;
+      display: flex;
       overflow: hidden;
     }
 
@@ -25,71 +76,14 @@
       align-items: center;
       padding: 15px 10px;
       box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-      transition: width 0.3s ease;
-      position: relative;
-      z-index: 10;
+      transition: transform 0.3s ease;
+      z-index: 1000;
     }
 
-    /* عند الطيّ */
-    #sidebar.collapsed {
-      width: 80px;
+    #sidebar.hidden {
+      transform: translateX(100%);
     }
 
-    #toggleBtn {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    #toggleBtn:hover {
-      transform: scale(1.2);
-    }
-
-    #sidebar header {
-      text-align: center;
-      margin-bottom: 20px;
-      transition: opacity 0.3s;
-    }
-
-    #sidebar.collapsed header .school-name,
-    #sidebar.collapsed header #pageTitle {
-      display: none;
-    }
-
-    #sidebar img {
-      width: 60px;
-      height: 60px;
-      border-radius: 10px;
-      background: #fff;
-      padding: 4px;
-      margin-bottom: 10px;
-      transition: width 0.3s, height 0.3s;
-    }
-
-    #sidebar.collapsed img {
-      width: 50px;
-      height: 50px;
-    }
-
-    .school-name {
-      font-size: 18px;
-      font-weight: bold;
-      color: #ecf0f1;
-    }
-
-    #pageTitle {
-      font-size: 15px;
-      color: #bdc3c7;
-      margin-top: 6px;
-    }
-
-    /* 🔹 أزرار القائمة */
     #menuContainer {
       flex: 1;
       width: 100%;
@@ -98,7 +92,6 @@
       gap: 8px;
       overflow-y: auto;
       padding: 0 5px;
-      transition: all 0.3s;
     }
 
     .button {
@@ -110,34 +103,12 @@
       color: white;
       font-size: 15px;
       cursor: pointer;
-      text-align: center;
       transition: 0.2s;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      text-align: center;
     }
 
     .button:hover {
       background: #217dbb;
-    }
-
-    #sidebar.collapsed .button {
-      font-size: 0;
-      padding: 10px 0;
-    }
-
-    #sidebar.collapsed .button::before {
-      content: "📄";
-      font-size: 20px;
-    }
-
-    /* 🔹 أزرار التحكم السفلي */
-    #navControls {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 15px;
     }
 
     .btn-danger {
@@ -146,6 +117,14 @@
 
     .btn-danger:hover {
       background-color: #c0392b;
+    }
+
+    #navControls {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
     }
 
     /* 🔹 منطقة عرض PDF */
@@ -157,7 +136,7 @@
       align-items: center;
       padding: 10px;
       overflow: hidden;
-      transition: margin 0.3s;
+      position: relative;
     }
 
     #pdfViewer {
@@ -165,102 +144,134 @@
       height: 100%;
       border: none;
       border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 🔹 الخلفية للقائمة الجانبية في الجوال */
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 900;
     }
 
     /* 🔹 تصميم الجوال */
     @media (max-width: 768px) {
-      body {
+      header {
+        justify-content: space-between;
+      }
+
+      #toggleBtn {
+        display: block;
+      }
+
+      .main {
         flex-direction: column;
       }
+
       #sidebar {
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        overflow-x: auto;
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        transform: translateX(100%);
       }
-      #toggleBtn {
-        left: unset;
-        right: 10px;
-        top: 10px;
+
+      #sidebar.active {
+        transform: translateX(0);
       }
-      #menuContainer {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding: 5px;
-      }
-      #pdfContainer {
-        height: calc(100vh - 180px);
+
+      #overlay.active {
+        display: block;
       }
     }
   </style>
 </head>
 <body>
-
-  <!-- 🔹 السايدبار -->
-  <div id="sidebar">
-    <button id="toggleBtn" title="طي / فتح القائمة">☰</button>
-
-    <header>
-      <img src="/icons/logo.png" alt="شعار المدرسة">
-      <div class="school-name">مجمع زايد التعليمي - الظيت</div>
-      <div id="pageTitle">🎓 لوحة التحكم</div>
-    </header>
-
-    <div id="menuContainer"></div>
-
-    <div id="navControls">
-      <button id="backBtn" class="button">🔙 رجوع للرئيسية</button>
-      <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
+  <!-- 🔹 الشريط العلوي -->
+  <header>
+    <div class="left">
+      <img src="/icons/logo.png" alt="شعار المدرسة" />
+      <div>
+        <div class="school-name">مجمع زايد التعليمي - الظيت</div>
+        <div id="pageTitle">🎓 لوحة التحكم</div>
+      </div>
     </div>
-  </div>
+    <button id="toggleBtn" title="فتح القائمة">☰</button>
+  </header>
 
-  <!-- 🔹 منطقة عرض PDF -->
-  <div id="pdfContainer">
-    <iframe id="pdfViewer"></iframe>
+  <!-- 🔹 التراك -->
+  <div id="overlay"></div>
+
+  <!-- 🔹 المحتوى الرئيسي -->
+  <div class="main">
+    <!-- السايدبار -->
+    <div id="sidebar">
+      <div id="menuContainer"></div>
+
+      <div id="navControls">
+        <button id="backBtn" class="button">🔙 رجوع للرئيسية</button>
+        <button id="exitBtn" class="button btn-danger">❌ إنهاء</button>
+      </div>
+    </div>
+
+    <!-- منطقة الـ PDF -->
+    <div id="pdfContainer">
+      <iframe id="pdfViewer"></iframe>
+    </div>
   </div>
 
   <script>
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("toggleBtn");
+    const overlay = document.getElementById("overlay");
     const menuContainer = document.getElementById("menuContainer");
     const pdfViewer = document.getElementById("pdfViewer");
     const pageTitle = document.getElementById("pageTitle");
 
-    // زر الطيّ / الفتح
-    toggleBtn.onclick = () => sidebar.classList.toggle("collapsed");
+    toggleBtn.onclick = () => {
+      sidebar.classList.toggle("active");
+      overlay.classList.toggle("active");
+    };
+    overlay.onclick = () => {
+      sidebar.classList.remove("active");
+      overlay.classList.remove("active");
+    };
 
-    // ==================== تحديد الدور والقسم ====================
     const params = new URLSearchParams(window.location.search);
     const role = params.get("role") || sessionStorage.getItem("role") || "student";
     const section = params.get("section") || sessionStorage.getItem("section") || "male";
     sessionStorage.setItem("role", role);
     sessionStorage.setItem("section", section);
 
-    pageTitle.textContent = role === "staff"
-      ? "🎓 لوحة تحكم الكادر الإداري والتدريسي"
-      : "🎓 لوحة تحكم الطالب / ولي الأمر";
+    pageTitle.textContent =
+      role === "staff"
+        ? "🎓 لوحة تحكم الكادر الإداري والتدريسي"
+        : "🎓 لوحة تحكم الطالب / ولي الأمر";
 
-    // ==================== تحميل القائمة ====================
     const BASE_URL = window.location.origin.includes("localhost")
       ? "http://localhost:3000"
       : window.location.origin;
 
     fetch(`${BASE_URL}/api/menu/${role}/${section}`)
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-      .then(menuItems => renderMenu(menuItems))
-      .catch(err => {
+      .then((menuItems) => renderMenu(menuItems))
+      .catch((err) => {
         console.error("خطأ في تحميل القائمة:", err);
-        menuContainer.innerHTML = "<p style='color:red;text-align:center;'>❌ تعذر تحميل القائمة من الخادم.</p>";
+        menuContainer.innerHTML =
+          "<p style='color:red;text-align:center;'>❌ تعذر تحميل القائمة من الخادم.</p>";
       });
 
     function renderMenu(menu) {
       menuContainer.innerHTML = "";
-      menu.forEach(item => {
+      menu.forEach((item) => {
         const btn = document.createElement("button");
         btn.className = "button";
         btn.textContent = item.title;
@@ -270,6 +281,9 @@
     }
 
     function handleMenuClick(item) {
+      sidebar.classList.remove("active");
+      overlay.classList.remove("active");
+
       switch (item.type) {
         case "pdf":
           openPdf(item.filename);
@@ -291,9 +305,11 @@
       pdfViewer.src = `/pdfjs/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
     }
 
-    document.getElementById("backBtn").onclick = () => window.location.href = "./index.html";
+    document.getElementById("backBtn").onclick = () =>
+      (window.location.href = "./index.html");
+
     document.getElementById("exitBtn").onclick = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
+      if (window.matchMedia("(display-mode: standalone)").matches) {
         window.close();
       } else {
         document.body.innerHTML = `
@@ -308,6 +324,5 @@
       }
     };
   </script>
-
 </body>
 </html>
