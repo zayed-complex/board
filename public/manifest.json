@@ -1,6 +1,6 @@
 {
-  "name": "School Board App",
-  "short_name": "Board",
+  "name": "منصة مجمّع زايد التعليمي",
+  "short_name": "مجمّع زايد التعليمي",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
