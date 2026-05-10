@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل المتابعة - الربط السحابي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .student-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative; overflow: hidden; }
+        .student-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .student-card.selected { border: 3px solid #4f46e5; background-color: #eef2ff; }
+        .selected-badge { position: absolute; top: 10px; left: 10px; background: #4f46e5; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .gradient-header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Header -->
+        <header class="gradient-header rounded-[2.5rem] p-8 text-white shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-5">
+                <div class="bg-indigo-500/20 p-4 rounded-3xl backdrop-blur-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black">سجل المعلم الذكي</h1>
+                    <p class="text-indigo-300 text-xs font-bold tracking-widest mt-1">نظام المزامنة السحابية والفصل التام</p>
+                </div>
+            </div>
+            <div id="auth-status" class="bg-white/10 px-6 py-2 rounded-full text-[11px] font-bold backdrop-blur-sm border border-white/10">
+                جاري الاتصال بالسحابة...
+            </div>
+        </header>
+
+        <!-- Login / Config Section -->
+        <section id="login-screen" class="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-200 text-center space-y-8 max-w-2xl mx-auto">
+            <div class="space-y-2">
+                <h2 class="text-xl font-black text-slate-800">إعدادات الجلسة</h2>
+                <p class="text-slate-400 text-sm">أدخل البيانات للوصول إلى طلابك</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 text-right">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 mr-2">اسم المعلم</label>
+                        <input type="text" id="teacher-name" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white transition-all outline-none font-bold" placeholder="أ. أحمد">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 mr-2">كلمة المرور</label>
+                        <input type="password" id="class-pass" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-500 focus:bg-white transition-all outline-none font-bold text-center" placeholder="****">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <select id="sel-subject" class="p-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none border-2 border-transparent focus:border-indigo-500">
+                        <option>اللغة العربية</option><option>الرياضيات</option><option>العلوم</option><option>التربية الإسلامية</option>
+                    </select>
+                    <select id="sel-grade" class="p-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none border-2 border-transparent focus:border-indigo-500">
+                        <option>الصف 4</option><option>الصف 5</option><option>الصف 6</option><option>الصف 7</option>
+                    </select>
+                    <select id="sel-section" class="p-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none border-2 border-transparent focus:border-indigo-500">
+                        <option>1</option><option>2</option><option>3</option>
+                    </select>
+                </div>
+                <button onclick="accessClass()" class="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-lg shadow-indigo-200 hover:scale-[1.02] active:scale-95 transition-all mt-4">
+                    بدء المتابعة الآن
+                </button>
+            </div>
+        </section>
+
+        <!-- Active Class Workspace -->
+        <main id="main-app" class="hidden space-y-6">
+            <!-- Toolbar -->
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="px-5 py-2.5 bg-indigo-50 rounded-2xl border border-indigo-100">
+                        <span id="class-title" class="text-indigo-700 font-black text-sm"></span>
+                    </div>
+                    <button onclick="location.reload()" class="text-rose-500 font-bold text-xs hover:underline">خروج آمن</button>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="bulkPoints(5, 'تميز')" class="px-5 py-2.5 bg-amber-500 text-white rounded-2xl font-black text-xs hover:shadow-lg transition-all">+5 تميز</button>
+                    <button onclick="bulkPoints(1, 'مشاركة')" class="px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-xs hover:shadow-lg transition-all">+1 مشاركة</button>
+                    <button onclick="bulkPoints(-1, 'مخالفة')" class="px-5 py-2.5 bg-rose-600 text-white rounded-2xl font-black text-xs hover:shadow-lg transition-all">-1 تنبيه</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Students Grid -->
+                <div class="lg:col-span-3">
+                    <div id="students-container" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <!-- Students injected here -->
+                    </div>
+                </div>
+
+                <!-- Side Panel -->
+                <aside class="space-y-6">
+                    <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200">
+                        <h3 class="font-black text-slate-800 text-sm mb-4">إدارة الأسماء</h3>
+                        <textarea id="raw-names" rows="8" class="w-full p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-indigo-500 transition-all mb-4" placeholder="أدخل الأسماء (اسم في كل سطر)"></textarea>
+                        <button id="save-btn" onclick="syncNames()" class="w-full bg-slate-800 text-white py-4 rounded-2xl text-xs font-black hover:bg-black transition-all">
+                            تحديث قاعدة البيانات
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 flex flex-col h-[350px]">
+                        <h3 class="font-black text-slate-800 text-sm mb-4">آخر التفاعلات</h3>
+                        <div id="log-list" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                            <!-- Logs injected here -->
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, serverTimestamp, query, where, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CONFIGURATION
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-tracker-v1';
+
+        let currentClassKey = ""; 
+        let state = {
+            students: [],
+            logs: [],
+            selected: new Set(),
+            user: null,
+            isAuthReady: false
+        };
+
+        // AUTH INITIALIZATION (Rule 3: Auth Before Queries)
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            state.user = user;
+            if (user) {
+                state.isAuthReady = true;
+                document.getElementById('auth-status').innerText = "تم الاتصال سحابياً";
+                document.getElementById('auth-status').classList.remove('bg-white/10');
+                document.getElementById('auth-status').classList.add('bg-emerald-500/20', 'text-emerald-400');
+            }
+        });
+
+        initAuth();
+
+        // 1. ACCESS CONTROL
+        window.accessClass = async () => {
+            if (!state.isAuthReady) return alert("الرجاء الانتظار حتى اكتمال الاتصال...");
+
+            const tName = document.getElementById('teacher-name').value.trim();
+            const pass = document.getElementById('class-pass').value.trim();
+            const subject = document.getElementById('sel-subject').value;
+            const grade = document.getElementById('sel-grade').value;
+            const section = document.getElementById('sel-section').value;
+
+            if (!tName || !pass) return alert("يرجى إدخال اسم المعلم وكلمة المرور");
+
+            // إنشاء مفتاح فريد لهذه الحصة تحديداً لمنع الخلط
+            const rawKey = `${tName}-${subject}-${grade}-${section}-${pass}`;
+            currentClassKey = btoa(unescape(encodeURIComponent(rawKey))).replace(/[/+=]/g, "");
+
+            document.getElementById('class-title').innerText = `${subject} | ${grade} (شعبة ${section})`;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+
+            startRealtimeListeners();
+        };
+
+        // 2. REALTIME SYNC
+        function startRealtimeListeners() {
+            if (!state.user) return;
+
+            // Listen for Students Data (Rule 1: Specific Path)
+            const studentDoc = doc(db, 'artifacts', appId, 'public', 'data', 'class_configs', currentClassKey);
+            onSnapshot(studentDoc, (docSnap) => {
+                if (docSnap.exists()) {
+                    state.students = docSnap.data().list || [];
+                    document.getElementById('raw-names').value = state.students.map(s => s.name).join("\n");
+                    render();
+                }
+            }, (err) => {
+                console.error("Student sync error:", err);
+            });
+
+            // Listen for Logs (Rule 2: Simple query, memory filter)
+            const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'class_logs');
+            onSnapshot(logsRef, (snap) => {
+                // Filter logs in memory for this classKey to avoid permission issues and complex indexing
+                state.logs = snap.docs
+                    .map(d => ({id: d.id, ...d.data()}))
+                    .filter(log => log.classId === currentClassKey)
+                    .sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
+                render();
+            }, (err) => {
+                console.error("Log sync error:", err);
+            });
+        }
+
+        // 3. DATABASE OPERATIONS
+        window.syncNames = async () => {
+            if (!state.user || !currentClassKey) return;
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.innerText = "جاري الحفظ...";
+
+            const names = document.getElementById('raw-names').value.split('\n').filter(n => n.trim());
+            const newList = names.map((name, index) => ({
+                id: `std_${index}_${Date.now()}`,
+                name: name.trim()
+            }));
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'class_configs', currentClassKey);
+                await setDoc(docRef, { 
+                    list: newList, 
+                    lastUpdated: serverTimestamp(),
+                    classId: currentClassKey 
+                });
+                state.selected.clear();
+            } catch (e) {
+                console.error("Save Error:", e);
+                alert("فشل في الحفظ، تأكد من الصلاحيات");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "تحديث قاعدة البيانات";
+            }
+        };
+
+        window.bulkPoints = async (points, label) => {
+            if (!state.user || state.selected.size === 0) return alert("اختر الطلاب أولاً");
+            
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'class_logs');
+            
+            try {
+                for (const sId of state.selected) {
+                    const student = state.students.find(x => x.id === sId);
+                    await addDoc(colRef, {
+                        classId: currentClassKey,
+                        studentId: sId,
+                        studentName: student.name,
+                        points: points,
+                        label: label,
+                        time: serverTimestamp()
+                    });
+                }
+                state.selected.clear();
+                render();
+            } catch (err) {
+                console.error("Add Points Error:", err);
+            }
+        };
+
+        // 4. UI RENDERING
+        function render() {
+            const container = document.getElementById('students-container');
+            container.innerHTML = "";
+
+            state.students.forEach(s => {
+                const studentScore = state.logs
+                    .filter(l => l.studentId === s.id)
+                    .reduce((sum, current) => sum + current.points, 0);
+
+                const card = document.createElement('div');
+                card.className = `student-card bg-white p-6 rounded-[2rem] border shadow-sm ${state.selected.has(s.id) ? 'selected' : 'border-slate-100'}`;
+                
+                if (state.selected.has(s.id)) {
+                    const badge = document.createElement('div');
+                    badge.className = "selected-badge";
+                    badge.innerText = "✓";
+                    card.appendChild(badge);
+                }
+
+                card.onclick = () => {
+                    if (state.selected.has(s.id)) state.selected.delete(s.id);
+                    else state.selected.add(s.id);
+                    render();
+                };
+
+                card.innerHTML += `
+                    <div class="text-center space-y-3">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-2xl mx-auto flex items-center justify-center text-indigo-600 font-black text-lg">
+                            ${s.name.charAt(0)}
+                        </div>
+                        <h4 class="font-black text-slate-800 text-xs truncate">${s.name}</h4>
+                        <div class="inline-block px-4 py-1 rounded-full ${studentScore >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} text-[10px] font-black">
+                            ${studentScore} نقطة
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // Render Logs
+            const logContainer = document.getElementById('log-list');
+            logContainer.innerHTML = state.logs.slice(0, 20).map(l => `
+                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100 animate-fade-in">
+                    <div class="text-[10px] font-bold">
+                        <span class="text-slate-800">${l.studentName}</span>
+                        <span class="text-slate-400 mr-1">(${l.label})</span>
+                    </div>
+                    <span class="text-[10px] font-black ${l.points > 0 ? 'text-emerald-500' : 'text-rose-500'}">
+                        ${l.points > 0 ? '+' : ''}${l.points}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+    </script>
+</body>
+</html>
